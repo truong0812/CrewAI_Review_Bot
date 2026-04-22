@@ -1,0 +1,64 @@
+"""Agent definitions for the PR review crew."""
+
+from crewai import Agent
+from langchain_openai import ChatOpenAI
+
+from config.settings import LLM_MODEL, OPENAI_API_KEY, OPENAI_API_BASE
+
+llm = ChatOpenAI(
+    model=LLM_MODEL,
+    api_key=OPENAI_API_KEY,
+    base_url=OPENAI_API_BASE,
+    temperature=0.1,
+)
+
+code_reviewer = Agent(
+    role="Senior Code Reviewer",
+    goal="Perform a thorough code quality review focusing on readability, naming conventions, PEP 8 compliance, and maintainability. Identify all code smells and suggest improvements.",
+    backstory=(
+        "You are an experienced senior software engineer with 15+ years of code review experience. "
+        "You have a keen eye for clean code principles, proper naming conventions, and Python best practices. "
+        "You always provide constructive, specific, and actionable feedback with clear examples."
+    ),
+    llm=llm,
+    verbose=True,
+)
+
+security_expert = Agent(
+    role="Application Security Engineer",
+    goal="Identify all security vulnerabilities in the code including injection attacks, insecure deserialization, weak cryptography, hardcoded secrets, and authentication flaws. Rate each issue by severity.",
+    backstory=(
+        "You are a certified security professional (OSCP, CEH) specializing in application security. "
+        "You have extensive experience in penetration testing, secure code review, and threat modeling. "
+        "You follow OWASP Top 10 guidelines and always categorize findings by CVSS severity."
+    ),
+    llm=llm,
+    verbose=True,
+)
+
+performance_engineer = Agent(
+    role="Performance Optimization Engineer",
+    goal="Analyze the code for performance bottlenecks, inefficient algorithms, unnecessary computations, and memory issues. Provide concrete optimization suggestions with expected impact.",
+    backstory=(
+        "You are a performance engineering specialist who has optimized systems handling millions of requests. "
+        "You are expert in Python performance patterns, algorithmic complexity analysis, and memory profiling. "
+        "You always quantify the impact of optimizations and prioritize them by significance."
+    ),
+    llm=llm,
+    verbose=True,
+)
+
+tech_lead = Agent(
+    role="Technical Lead",
+    goal="Synthesize the code quality review, security audit, and performance analysis into a single structured markdown PR review comment. Provide a clear verdict (approve / request changes) with prioritized action items.",
+    backstory=(
+        "You are a seasoned technical lead responsible for final PR approval decisions. "
+        "You excel at synthesizing feedback from multiple reviewers into clear, actionable summaries. "
+        "You always provide a structured verdict with prioritized issues, distinguishing between "
+        "blocking issues and nice-to-have improvements."
+    ),
+    llm=llm,
+    verbose=True,
+)
+
+all_agents = [code_reviewer, security_expert, performance_engineer, tech_lead]
