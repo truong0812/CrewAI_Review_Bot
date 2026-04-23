@@ -91,11 +91,12 @@ class GitHubClient:
         return resp.json()
 
     def get_pr_code_for_review(
-        self, owner: str, repo: str, pr_number: int
+        self, owner: str, repo: str, pr_number: int, max_chars: int = 12000
     ) -> str:
         """Fetch PR info and format the code for agent review.
 
         Returns a formatted string with PR title, description, and file diffs.
+        Content is truncated to max_chars to fit within LLM context limits.
         """
         pr_info = self.fetch_pr_title_and_body(owner, repo, pr_number)
         files = self.fetch_pr_files(owner, repo, pr_number)
@@ -111,9 +112,23 @@ class GitHubClient:
             status = f.get("status", "unknown")
             patch = f.get("patch", "(binary file or no patch available)")
 
-            sections.append(f"### File: `{filename}` (status: {status})")
-            sections.append(f"(+{f.get('additions', 0)} / -{f.get('deletions', 0)})")
-            sections.append(f"```diff\n{patch}\n```")
-            sections.append("")
+            # Truncate large diffs to keep within context limit
+            max_patch_chars = 3000
+            if len(patch) > max_patch_chars:
+                patch = patch[:max_patch_chars] + "\n... (truncated)"
+
+            entry = (
+                f"### File: `{filename}` (status: {status})\n"
+                f"(+{f.get('additions', 0)} / -{f.get('deletions', 0)})\n"
+                f"```diff\n{patch}\n```\n"
+            )
+
+            # Check if adding this entry would exceed total limit
+            current_len = sum(len(s) + 1 for s in sections)
+            if current_len + len(entry) > max_chars:
+                sections.append(f"### ... and {len(files) - files.index(f)} more file(s) (truncated)\n")
+                break
+
+            sections.append(entry)
 
         return "\n".join(sections)

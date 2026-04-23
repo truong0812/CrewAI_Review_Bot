@@ -1,16 +1,15 @@
 """Agent definitions for the PR review crew."""
 
+import os
+
 from crewai import Agent
-from langchain_openai import ChatOpenAI
 
 from config.settings import LLM_MODEL, OPENAI_API_KEY, OPENAI_API_BASE
 
-llm = ChatOpenAI(
-    model=LLM_MODEL,
-    api_key=OPENAI_API_KEY,
-    base_url=OPENAI_API_BASE,
-    temperature=0.1,
-)
+# CrewAI uses the OpenAI SDK internally, which reads these env vars:
+# OPENAI_API_KEY and OPENAI_BASE_URL (official SDK env var name)
+os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+os.environ["OPENAI_BASE_URL"] = OPENAI_API_BASE
 
 code_reviewer = Agent(
     role="Senior Code Reviewer",
@@ -20,7 +19,7 @@ code_reviewer = Agent(
         "You have a keen eye for clean code principles, proper naming conventions, and Python best practices. "
         "You always provide constructive, specific, and actionable feedback with clear examples."
     ),
-    llm=llm,
+    llm=LLM_MODEL,
     verbose=True,
 )
 
@@ -32,7 +31,7 @@ security_expert = Agent(
         "You have extensive experience in penetration testing, secure code review, and threat modeling. "
         "You follow OWASP Top 10 guidelines and always categorize findings by CVSS severity."
     ),
-    llm=llm,
+    llm=LLM_MODEL,
     verbose=True,
 )
 
@@ -44,7 +43,7 @@ performance_engineer = Agent(
         "You are expert in Python performance patterns, algorithmic complexity analysis, and memory profiling. "
         "You always quantify the impact of optimizations and prioritize them by significance."
     ),
-    llm=llm,
+    llm=LLM_MODEL,
     verbose=True,
 )
 
@@ -57,7 +56,7 @@ tech_lead = Agent(
         "You always provide a structured verdict with prioritized issues, distinguishing between "
         "blocking issues and nice-to-have improvements."
     ),
-    llm=llm,
+    llm=LLM_MODEL,
     verbose=True,
 )
 
