@@ -1,0 +1,13 @@
+{
+  "project_name": "CrewAI_Review_Bot",
+  "repo_id": "aa7f64270621b9fa",
+  "last_snapshot": "2026-05-06",
+  "branch": "main",
+  "commit_sha": "ec130692e8ab",
+  "stats": {
+    "files": 22,
+    "symbols": 17,
+    "relations": 57,
+    "summaries": 39
+  }
+}

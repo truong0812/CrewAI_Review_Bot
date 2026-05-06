@@ -1,0 +1,2501 @@
+{
+  "repository": {
+    "repo_id": "aa7f64270621b9fa",
+    "url": "",
+    "branch": "main",
+    "commit_sha": "ec130692e8ab",
+    "ingested_at": "2026-05-06T14:39:25.500025+00:00"
+  },
+  "snapshot": {
+    "snapshot_id": "e5a3573614575b67",
+    "repo_id": "aa7f64270621b9fa",
+    "branch": "main",
+    "commit_sha": "ec130692e8ab",
+    "created_at": "2026-05-06T14:39:25.500060+00:00",
+    "status": "complete",
+    "file_count": 22,
+    "symbol_count": 17,
+    "relation_count": 57,
+    "summary_count": 39
+  },
+  "files": [
+    {
+      "file_id": "2a89e314e8ddb5ee",
+      "snapshot_id": "e5a3573614575b67",
+      "path": ".env.example",
+      "language": "unknown",
+      "hash": "d215c4486ce177de1fee8bb2687afefbedeeaea92d051baf17776ce9d89fc370",
+      "size": 189,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "f302e0d0a40f63de",
+      "snapshot_id": "e5a3573614575b67",
+      "path": ".gitignore",
+      "language": "unknown",
+      "hash": "2e56e8847dcf532e8f6acf996adf54e7c03836faf9711cef3d7699a9f3076dd6",
+      "size": 166,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "9570f66d0c2ee506",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "install.bat",
+      "language": "unknown",
+      "hash": "2662e162ce2eccdbeba57f2ca62daa2ec8f1e2aa8da22909964ca6c502c60d06",
+      "size": 217,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "cd52bf8172109328",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "install_log.txt",
+      "language": "unknown",
+      "hash": "1e6cd475f7322f557df2a123a60eb30373ab999c8cbf1bbe29bac3da11c87f80",
+      "size": 28837,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "bc9c8f6bcb2e27a2",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "main.py",
+      "language": "python",
+      "hash": "181b967c1068b146df7bc7231a169489b8d9ee980e36052f6125d6585af30507",
+      "size": 3400,
+      "is_entrypoint": true,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "7ac5b42770c2e749",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "README.md",
+      "language": "unknown",
+      "hash": "de4dac07cd0f51e8e92572f78d8533ed453efe753c73910dae17075a3aa20550",
+      "size": 14466,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "3a69462f81efef01",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "requirements.txt",
+      "language": "unknown",
+      "hash": "7dd8ebfc77b4758ffa826f82b0bd758103d92f8f67ebaa525af8d3543c650c39",
+      "size": 39,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": true
+    },
+    {
+      "file_id": "551be94e9a473df6",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "run.bat",
+      "language": "unknown",
+      "hash": "da565a628f0c1d528ca55b1f05f2e7190e4a8bf17ecb1941aa59a2a4f83edae9",
+      "size": 139,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "4f42b279b40727ee",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "test_api.py",
+      "language": "python",
+      "hash": "ab44dd51aa0878ac70feed7af0162a55ffe73d5f5bcf772f0795755ec741f698",
+      "size": 1188,
+      "is_entrypoint": false,
+      "is_test": true,
+      "is_config": false
+    },
+    {
+      "file_id": "2f397489f47a2328",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "agents/agents.py",
+      "language": "python",
+      "hash": "e4b7b5502062756c7b43ff267ac4d1a7ea0c6e03e4a0b5aab14f59f63ea2ce4c",
+      "size": 3121,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "0db829a182617f90",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "agents/__init__.py",
+      "language": "python",
+      "hash": "2bf71ad69b608b8ec10e75ea680bb5842abf3d7cff60800a535e23acf0163f0a",
+      "size": 15,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "dd6b50af8a326bf4",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "config/settings.py",
+      "language": "python",
+      "hash": "98c28d8b412cad16d06ff80c43c4a5dbc3779cdefd65b4c8422c0185e2d30b04",
+      "size": 438,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "92aa79ba6da5f3e8",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "config/__init__.py",
+      "language": "python",
+      "hash": "67e2d0fdd5706c0a2f7d6b3fe87487f0e3a6342059177dde22c7fe07be4cef86",
+      "size": 15,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "381121803a11e323",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "github_utils/client.py",
+      "language": "python",
+      "hash": "5f4e6d289e21454f47f63a2c76a5e98a315bb92fcf017b79d3afa62ab3ceef34",
+      "size": 5063,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "198095986fee3a11",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "github_utils/__init__.py",
+      "language": "python",
+      "hash": "6f2a1fc8895c0f444a8644e8656bed654f146f162be73ff44087c608fa7c485f",
+      "size": 21,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "e65b80a1a8052ceb",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "knowledge_base/CrewAI_Review_Bot/latest.json",
+      "language": "unknown",
+      "hash": "8cc710fc941d386f1a7cccb2d54c991da6e6a0376b80d2824355804953baa5bd",
+      "size": 61903,
+      "is_entrypoint": false,
+      "is_test": true,
+      "is_config": false
+    },
+    {
+      "file_id": "52580e6bff3fc6cf",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "knowledge_base/CrewAI_Review_Bot/metadata.json",
+      "language": "unknown",
+      "hash": "970c355ebcbfce947c981f99e81c6681ac74b8f5a9a597b5c5af64602e8f5951",
+      "size": 266,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "6c1be6099c15380e",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "knowledge_base/CrewAI_Review_Bot/USE_GUIDE.md",
+      "language": "unknown",
+      "hash": "af54241750dc5d6f8ffd8afd956f40b6ff80eb7d6bd62d1889dada49c699b580",
+      "size": 2687,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "2a873fb71082c24e",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "knowledge_base/CrewAI_Review_Bot/indexes/semantic_index.json",
+      "language": "unknown",
+      "hash": "8679fda97d13e8feb6d0be68378b0339e73460a18cb367537def82a1913649a6",
+      "size": 35860,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "ce7f8fcbdf6d56e7",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "knowledge_base/CrewAI_Review_Bot/snapshots/2026-05-06/snapshot.json",
+      "language": "unknown",
+      "hash": "8cc710fc941d386f1a7cccb2d54c991da6e6a0376b80d2824355804953baa5bd",
+      "size": 61903,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "ba868db24a5bd734",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "tasks/tasks.py",
+      "language": "python",
+      "hash": "d045d1d6ce09636d7e7d266e825a6321c27a94e3cea8020b0fd6375f9662773c",
+      "size": 4387,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    },
+    {
+      "file_id": "69ca1a0099bdec79",
+      "snapshot_id": "e5a3573614575b67",
+      "path": "tasks/__init__.py",
+      "language": "python",
+      "hash": "4df0e2a9cc2e6d23fa3d96be005c0ee7c50ea68d19819b91a7c4b0d18c317316",
+      "size": 14,
+      "is_entrypoint": false,
+      "is_test": false,
+      "is_config": false
+    }
+  ],
+  "modules": [
+    {
+      "module_id": "df2b1525893de101",
+      "snapshot_id": "e5a3573614575b67",
+      "name": "root",
+      "path_pattern": "root/",
+      "files": [
+        "2a89e314e8ddb5ee",
+        "f302e0d0a40f63de",
+        "9570f66d0c2ee506",
+        "cd52bf8172109328",
+        "bc9c8f6bcb2e27a2",
+        "7ac5b42770c2e749",
+        "3a69462f81efef01",
+        "551be94e9a473df6",
+        "4f42b279b40727ee"
+      ],
+      "description": ""
+    },
+    {
+      "module_id": "9eff49ceb25cd9eb",
+      "snapshot_id": "e5a3573614575b67",
+      "name": "agents",
+      "path_pattern": "agents/",
+      "files": [
+        "2f397489f47a2328",
+        "0db829a182617f90"
+      ],
+      "description": ""
+    },
+    {
+      "module_id": "9d3dede80f20ae79",
+      "snapshot_id": "e5a3573614575b67",
+      "name": "config",
+      "path_pattern": "config/",
+      "files": [
+        "dd6b50af8a326bf4",
+        "92aa79ba6da5f3e8"
+      ],
+      "description": ""
+    },
+    {
+      "module_id": "03a9d3e2db10c22c",
+      "snapshot_id": "e5a3573614575b67",
+      "name": "github_utils",
+      "path_pattern": "github_utils/",
+      "files": [
+        "381121803a11e323",
+        "198095986fee3a11"
+      ],
+      "description": ""
+    },
+    {
+      "module_id": "7f77b3ea35da1c7d",
+      "snapshot_id": "e5a3573614575b67",
+      "name": "knowledge_base",
+      "path_pattern": "knowledge_base/",
+      "files": [
+        "e65b80a1a8052ceb",
+        "52580e6bff3fc6cf",
+        "6c1be6099c15380e",
+        "2a873fb71082c24e",
+        "ce7f8fcbdf6d56e7"
+      ],
+      "description": ""
+    },
+    {
+      "module_id": "37b7fd1da1f44c84",
+      "snapshot_id": "e5a3573614575b67",
+      "name": "tasks",
+      "path_pattern": "tasks/",
+      "files": [
+        "ba868db24a5bd734",
+        "69ca1a0099bdec79"
+      ],
+      "description": ""
+    }
+  ],
+  "symbols": [
+    {
+      "symbol_id": "99dff3d2f031757b",
+      "file_id": "bc9c8f6bcb2e27a2",
+      "name": "in()",
+      "kind": "function",
+      "path": "in()",
+      "line_start": 23,
+      "line_end": 108,
+      "hash": "17512c771bec",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [],
+      "return_type": "",
+      "docstring": ""
+    },
+    {
+      "symbol_id": "ac446fbace2e33e3",
+      "file_id": "2f397489f47a2328",
+      "name": "OPENAI_API_KEY",
+      "kind": "constant",
+      "path": "OPENAI_API_KEY",
+      "line_start": 11,
+      "line_end": 11,
+      "hash": "977e5b736660",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [],
+      "return_type": "",
+      "docstring": ""
+    },
+    {
+      "symbol_id": "4d01c786cfe0c686",
+      "file_id": "2f397489f47a2328",
+      "name": "OPENAI_API_BASE",
+      "kind": "constant",
+      "path": "OPENAI_API_BASE",
+      "line_start": 12,
+      "line_end": 12,
+      "hash": "952d1cc14690",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [],
+      "return_type": "",
+      "docstring": ""
+    },
+    {
+      "symbol_id": "bcfc338cb6382e97",
+      "file_id": "dd6b50af8a326bf4",
+      "name": "OPENAI_API_KEY",
+      "kind": "constant",
+      "path": "OPENAI_API_KEY",
+      "line_start": 10,
+      "line_end": 10,
+      "hash": "70bdc72771ec",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [],
+      "return_type": "",
+      "docstring": ""
+    },
+    {
+      "symbol_id": "ad0bcaab96972daa",
+      "file_id": "dd6b50af8a326bf4",
+      "name": "OPENAI_API_BASE",
+      "kind": "constant",
+      "path": "OPENAI_API_BASE",
+      "line_start": 11,
+      "line_end": 11,
+      "hash": "f34f0017f41e",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [],
+      "return_type": "",
+      "docstring": ""
+    },
+    {
+      "symbol_id": "31cd9678600e2820",
+      "file_id": "dd6b50af8a326bf4",
+      "name": "LLM_MODEL",
+      "kind": "constant",
+      "path": "LLM_MODEL",
+      "line_start": 12,
+      "line_end": 12,
+      "hash": "95d09a6489fc",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [],
+      "return_type": "",
+      "docstring": ""
+    },
+    {
+      "symbol_id": "2a15aac7a72a104b",
+      "file_id": "dd6b50af8a326bf4",
+      "name": "GITHUB_TOKEN",
+      "kind": "constant",
+      "path": "GITHUB_TOKEN",
+      "line_start": 15,
+      "line_end": 15,
+      "hash": "c091973d22ab",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [],
+      "return_type": "",
+      "docstring": ""
+    },
+    {
+      "symbol_id": "78f0d6565081d461",
+      "file_id": "381121803a11e323",
+      "name": "GitHubClient",
+      "kind": "class",
+      "path": "GitHubClient",
+      "line_start": 9,
+      "line_end": 134,
+      "hash": "17c869aee611",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [],
+      "return_type": "",
+      "docstring": "Simple GitHub API client using httpx."
+    },
+    {
+      "symbol_id": "ebe418aa778f5f77",
+      "file_id": "381121803a11e323",
+      "name": "BASE_URL",
+      "kind": "constant",
+      "path": "GitHubClient.BASE_URL",
+      "line_start": 12,
+      "line_end": 12,
+      "hash": "c3af16ab91fe",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [],
+      "return_type": "",
+      "docstring": ""
+    },
+    {
+      "symbol_id": "fc2384faf2f7e395",
+      "file_id": "381121803a11e323",
+      "name": "__init__",
+      "kind": "method",
+      "path": "GitHubClient.__init__",
+      "line_start": 14,
+      "line_end": 20,
+      "hash": "b5a3678d57c5",
+      "visibility": "special",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [
+        "self",
+        "token"
+      ],
+      "return_type": "",
+      "docstring": ""
+    },
+    {
+      "symbol_id": "727ba20995c79201",
+      "file_id": "381121803a11e323",
+      "name": "parse_pr_url",
+      "kind": "method",
+      "path": "GitHubClient.parse_pr_url",
+      "line_start": 23,
+      "line_end": 41,
+      "hash": "3e76dfd8de13",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [
+        "url"
+      ],
+      "return_type": "tuple[str, str, int]",
+      "docstring": "Parse a GitHub PR URL into (owner, repo, pr_number).  Supports formats: - https://github.com/owner/repo/pull/123 - https://github.com/owner/repo/pull/123/ - http://github.com/owner/repo/pull/123"
+    },
+    {
+      "symbol_id": "9cc011e7666f83a6",
+      "file_id": "381121803a11e323",
+      "name": "fetch_pr_files",
+      "kind": "method",
+      "path": "GitHubClient.fetch_pr_files",
+      "line_start": 43,
+      "line_end": 68,
+      "hash": "2a0fd3f8a0d0",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [
+        "self",
+        "owner",
+        "repo",
+        "pr_number"
+      ],
+      "return_type": "list[dict]",
+      "docstring": "Fetch the list of changed files in a PR.  Returns a list of dicts with keys: filename, status, additions, deletions, patch."
+    },
+    {
+      "symbol_id": "e3e6376f9c02c75f",
+      "file_id": "381121803a11e323",
+      "name": "fetch_pr_diff",
+      "kind": "method",
+      "path": "GitHubClient.fetch_pr_diff",
+      "line_start": 70,
+      "line_end": 76,
+      "hash": "48e8a1d0e5c4",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [
+        "self",
+        "owner",
+        "repo",
+        "pr_number"
+      ],
+      "return_type": "str",
+      "docstring": "Fetch the full diff/patch of a PR."
+    },
+    {
+      "symbol_id": "9d6ac61889907c92",
+      "file_id": "381121803a11e323",
+      "name": "fetch_pr_title_and_body",
+      "kind": "method",
+      "path": "GitHubClient.fetch_pr_title_and_body",
+      "line_start": 78,
+      "line_end": 84,
+      "hash": "cf310ca6ba62",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [
+        "self",
+        "owner",
+        "repo",
+        "pr_number"
+      ],
+      "return_type": "dict",
+      "docstring": "Fetch PR title and description."
+    },
+    {
+      "symbol_id": "db986cf259804867",
+      "file_id": "381121803a11e323",
+      "name": "post_comment",
+      "kind": "method",
+      "path": "GitHubClient.post_comment",
+      "line_start": 86,
+      "line_end": 91,
+      "hash": "1080d561c328",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [
+        "self",
+        "owner",
+        "repo",
+        "pr_number",
+        "body"
+      ],
+      "return_type": "dict",
+      "docstring": "Post a comment on a PR (issue comment)."
+    },
+    {
+      "symbol_id": "8ff694551bf36887",
+      "file_id": "381121803a11e323",
+      "name": "get_pr_code_for_review",
+      "kind": "method",
+      "path": "GitHubClient.get_pr_code_for_review",
+      "line_start": 93,
+      "line_end": 134,
+      "hash": "0dc632dead2e",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [
+        "self",
+        "owner",
+        "repo",
+        "pr_number",
+        "max_chars"
+      ],
+      "return_type": "str",
+      "docstring": ""
+    },
+    {
+      "symbol_id": "a86bef1e91751e1e",
+      "file_id": "ba868db24a5bd734",
+      "name": "build_tasks",
+      "kind": "function",
+      "path": "build_tasks",
+      "line_start": 8,
+      "line_end": 101,
+      "hash": "f998203104b7",
+      "visibility": "public",
+      "is_async": false,
+      "is_static": false,
+      "parameters": [
+        "code"
+      ],
+      "return_type": "list[Task]",
+      "docstring": "Build tasks with the given code/diff content for review.  Args: code: The PR code/diff content formatted for review.  Returns: List of 4 Task objects to be executed sequentially."
+    }
+  ],
+  "relations": [
+    {
+      "source_id": "df2b1525893de101",
+      "target_id": "2a89e314e8ddb5ee",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'root' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "df2b1525893de101",
+      "target_id": "f302e0d0a40f63de",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'root' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "df2b1525893de101",
+      "target_id": "9570f66d0c2ee506",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'root' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "df2b1525893de101",
+      "target_id": "cd52bf8172109328",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'root' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "df2b1525893de101",
+      "target_id": "bc9c8f6bcb2e27a2",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'root' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "df2b1525893de101",
+      "target_id": "7ac5b42770c2e749",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'root' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "df2b1525893de101",
+      "target_id": "3a69462f81efef01",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'root' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "df2b1525893de101",
+      "target_id": "551be94e9a473df6",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'root' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "df2b1525893de101",
+      "target_id": "4f42b279b40727ee",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'root' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "9eff49ceb25cd9eb",
+      "target_id": "2f397489f47a2328",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'agents' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "9eff49ceb25cd9eb",
+      "target_id": "0db829a182617f90",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'agents' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "9d3dede80f20ae79",
+      "target_id": "dd6b50af8a326bf4",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'config' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "9d3dede80f20ae79",
+      "target_id": "92aa79ba6da5f3e8",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'config' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "03a9d3e2db10c22c",
+      "target_id": "381121803a11e323",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'github_utils' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "03a9d3e2db10c22c",
+      "target_id": "198095986fee3a11",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'github_utils' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "7f77b3ea35da1c7d",
+      "target_id": "e65b80a1a8052ceb",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'knowledge_base' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "7f77b3ea35da1c7d",
+      "target_id": "52580e6bff3fc6cf",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'knowledge_base' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "7f77b3ea35da1c7d",
+      "target_id": "6c1be6099c15380e",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'knowledge_base' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "7f77b3ea35da1c7d",
+      "target_id": "2a873fb71082c24e",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'knowledge_base' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "7f77b3ea35da1c7d",
+      "target_id": "ce7f8fcbdf6d56e7",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'knowledge_base' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "37b7fd1da1f44c84",
+      "target_id": "ba868db24a5bd734",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'tasks' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "37b7fd1da1f44c84",
+      "target_id": "69ca1a0099bdec79",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "Module 'tasks' contains file",
+      "source_type": "Module",
+      "target_type": "File"
+    },
+    {
+      "source_id": "bc9c8f6bcb2e27a2",
+      "target_id": "99dff3d2f031757b",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains function 'in()'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "2f397489f47a2328",
+      "target_id": "ac446fbace2e33e3",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains constant 'OPENAI_API_KEY'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "2f397489f47a2328",
+      "target_id": "4d01c786cfe0c686",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains constant 'OPENAI_API_BASE'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "dd6b50af8a326bf4",
+      "target_id": "bcfc338cb6382e97",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains constant 'OPENAI_API_KEY'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "dd6b50af8a326bf4",
+      "target_id": "ad0bcaab96972daa",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains constant 'OPENAI_API_BASE'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "dd6b50af8a326bf4",
+      "target_id": "31cd9678600e2820",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains constant 'LLM_MODEL'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "dd6b50af8a326bf4",
+      "target_id": "2a15aac7a72a104b",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains constant 'GITHUB_TOKEN'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "381121803a11e323",
+      "target_id": "78f0d6565081d461",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains class 'GitHubClient'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "381121803a11e323",
+      "target_id": "ebe418aa778f5f77",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains constant 'BASE_URL'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "381121803a11e323",
+      "target_id": "fc2384faf2f7e395",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains method '__init__'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "381121803a11e323",
+      "target_id": "727ba20995c79201",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains method 'parse_pr_url'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "381121803a11e323",
+      "target_id": "9cc011e7666f83a6",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains method 'fetch_pr_files'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "381121803a11e323",
+      "target_id": "e3e6376f9c02c75f",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains method 'fetch_pr_diff'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "381121803a11e323",
+      "target_id": "9d6ac61889907c92",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains method 'fetch_pr_title_and_body'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "381121803a11e323",
+      "target_id": "db986cf259804867",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains method 'post_comment'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "381121803a11e323",
+      "target_id": "8ff694551bf36887",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains method 'get_pr_code_for_review'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "ba868db24a5bd734",
+      "target_id": "a86bef1e91751e1e",
+      "relation_type": "contains",
+      "confidence": 1.0,
+      "evidence": "File contains function 'build_tasks'",
+      "source_type": "File",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "2f397489f47a2328",
+      "target_id": "dd6b50af8a326bf4",
+      "relation_type": "imports",
+      "confidence": 0.9,
+      "evidence": "from config.settings import ",
+      "source_type": "File",
+      "target_type": "File"
+    },
+    {
+      "source_id": "ba868db24a5bd734",
+      "target_id": "2f397489f47a2328",
+      "relation_type": "imports",
+      "confidence": 0.9,
+      "evidence": "from agents.agents import ",
+      "source_type": "File",
+      "target_type": "File"
+    },
+    {
+      "source_id": "2f397489f47a2328",
+      "target_id": "dd6b50af8a326bf4",
+      "relation_type": "depends_on",
+      "confidence": 0.8,
+      "evidence": "from config.settings import ",
+      "source_type": "File",
+      "target_type": "File"
+    },
+    {
+      "source_id": "ba868db24a5bd734",
+      "target_id": "2f397489f47a2328",
+      "relation_type": "depends_on",
+      "confidence": 0.8,
+      "evidence": "from agents.agents import ",
+      "source_type": "File",
+      "target_type": "File"
+    },
+    {
+      "source_id": "78f0d6565081d461",
+      "target_id": "ebe418aa778f5f77",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'GitHubClient' references 'BASE_URL' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "78f0d6565081d461",
+      "target_id": "fc2384faf2f7e395",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'GitHubClient' references '__init__' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "78f0d6565081d461",
+      "target_id": "727ba20995c79201",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'GitHubClient' references 'parse_pr_url' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "78f0d6565081d461",
+      "target_id": "9cc011e7666f83a6",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'GitHubClient' references 'fetch_pr_files' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "78f0d6565081d461",
+      "target_id": "e3e6376f9c02c75f",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'GitHubClient' references 'fetch_pr_diff' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "78f0d6565081d461",
+      "target_id": "9d6ac61889907c92",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'GitHubClient' references 'fetch_pr_title_and_body' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "78f0d6565081d461",
+      "target_id": "db986cf259804867",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'GitHubClient' references 'post_comment' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "78f0d6565081d461",
+      "target_id": "8ff694551bf36887",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'GitHubClient' references 'get_pr_code_for_review' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "9cc011e7666f83a6",
+      "target_id": "ebe418aa778f5f77",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'fetch_pr_files' references 'BASE_URL' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "e3e6376f9c02c75f",
+      "target_id": "ebe418aa778f5f77",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'fetch_pr_diff' references 'BASE_URL' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "9d6ac61889907c92",
+      "target_id": "ebe418aa778f5f77",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'fetch_pr_title_and_body' references 'BASE_URL' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "db986cf259804867",
+      "target_id": "ebe418aa778f5f77",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'post_comment' references 'BASE_URL' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "8ff694551bf36887",
+      "target_id": "9cc011e7666f83a6",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'get_pr_code_for_review' references 'fetch_pr_files' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    },
+    {
+      "source_id": "8ff694551bf36887",
+      "target_id": "9d6ac61889907c92",
+      "relation_type": "uses",
+      "confidence": 0.6,
+      "evidence": "'get_pr_code_for_review' references 'fetch_pr_title_and_body' (same file)",
+      "source_type": "Symbol",
+      "target_type": "Symbol"
+    }
+  ],
+  "summaries": [
+    {
+      "summary_id": "5ddac58c60dcd3d5",
+      "target_id": "2a89e314e8ddb5ee",
+      "target_type": "file",
+      "content": "This is an environment variable template file for configuring API credentials and model settings. It defines placeholders for OpenAI integration (`OPENAI_API_KEY`, `OPENAI_API_BASE`, `LLM_MODEL`) and GitHub authentication (`GITHUB_TOKEN`). The file serves as a reference for developers to create their own `.env` file with actual values, ensuring sensitive keys are not hardcoded in the source.",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "unknown",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "4c743de9d68db06a",
+      "target_id": "f302e0d0a40f63de",
+      "target_type": "file",
+      "content": "File '.gitignore' (unknown). (18 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "unknown",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "51076109f70fbddc",
+      "target_id": "9570f66d0c2ee506",
+      "target_type": "file",
+      "content": "This batch script automates the setup of a Python virtual environment and installs required packages for a CrewAI-based PR review bot. It navigates to the project directory, activates the virtual environment located in `.venv`, and runs `pip install` for `crewai`, `langchain-openai`, and `python-dotenv`, redirecting all output to `install_log.txt`. The script appends \"DONE\" to the log file upon completion.",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "unknown",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "125d73045c9dcd08",
+      "target_id": "cd52bf8172109328",
+      "target_type": "file",
+      "content": "This is a pip install log file capturing the installation of the `crewai` package (version 1.14.2) and its dependency `langchain-openai` into a Python virtual environment. It records the resolution and caching of packages, showing which dependencies are already satisfied and which are being newly collected (e.g., `chromadb`, `lancedb`, `mcp`). The file serves as a record of the environment setup for a project named \"pr-review-bot,\" with no executable code or symbols defined.",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "unknown",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "04f2ff9335455911",
+      "target_id": "bc9c8f6bcb2e27a2",
+      "target_type": "file",
+      "content": "File 'main.py' (python). Contains function(s): in(). (112 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "84bbb026199933d8",
+      "target_id": "7ac5b42770c2e749",
+      "target_type": "file",
+      "content": "The README.md describes a multi-agent pull request review bot built with CrewAI and LangChain OpenAI. It defines four AI agents—Code Reviewer, Security Expert, Performance Engineer, and Tech Lead—that sequentially analyze PR diffs for code quality, vulnerabilities, and performance issues, then synthesize a final review. The system fetches PR files via the GitHub API and automatically posts the review as a comment. The document includes project structure, agent roles, workflow diagram, prerequisites, and setup instructions.",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "unknown",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "1af36d9e330058c6",
+      "target_id": "3a69462f81efef01",
+      "target_type": "file",
+      "content": "File 'requirements.txt' (unknown). (3 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "unknown",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "c2aa42bfb7eca40a",
+      "target_id": "551be94e9a473df6",
+      "target_type": "file",
+      "content": "This is a Windows batch script that automates the execution of a Python application. It changes the working directory to a specific CrewAI project folder, activates a Python virtual environment, runs `main.py` with any passed command-line arguments, and then pauses to keep the console window open.",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "unknown",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "9b010e8a4f0c3e46",
+      "target_id": "4f42b279b40727ee",
+      "target_type": "file",
+      "content": "File 'test_api.py' (python). (30 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "27e6147db767a6cb",
+      "target_id": "2f397489f47a2328",
+      "target_type": "file",
+      "content": "This file defines four specialized CrewAI agents for an automated PR review system. It configures the OpenAI API environment variables and creates agents with distinct roles: a senior code reviewer, a security engineer, a performance engineer, and a technical lead. Each agent is initialized with a specific goal, backstory, and the LLM model from settings. The agents are collected into a list for use in a CrewAI crew.",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "264005e16e6e072f",
+      "target_id": "0db829a182617f90",
+      "target_type": "file",
+      "content": "File '__init__.py' (python). (1 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "f0eed9c1a9565f4c",
+      "target_id": "dd6b50af8a326bf4",
+      "target_type": "file",
+      "content": "File 'settings.py' (python). Contains constant(s): OPENAI_API_KEY, OPENAI_API_BASE, LLM_MODEL +1 more. (15 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "e0226ef86b69e0d4",
+      "target_id": "92aa79ba6da5f3e8",
+      "target_type": "file",
+      "content": "File '__init__.py' (python). (1 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "2c934d0be8f97894",
+      "target_id": "381121803a11e323",
+      "target_type": "file",
+      "content": "File 'client.py' (python). Contains class(s): GitHubClient; constant(s): BASE_URL; method(s): __init__, parse_pr_url, fetch_pr_files +4 more. (135 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "e009125904378100",
+      "target_id": "198095986fee3a11",
+      "target_type": "file",
+      "content": "File '__init__.py' (python). (1 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "6896b8b416aa95c2",
+      "target_id": "e65b80a1a8052ceb",
+      "target_type": "file",
+      "content": "File 'latest.json' (unknown). (2112 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "unknown",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "805cbbad83fa7eb4",
+      "target_id": "52580e6bff3fc6cf",
+      "target_type": "file",
+      "content": "File 'metadata.json' (unknown). (13 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "unknown",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "f41bfad4a5725715",
+      "target_id": "6c1be6099c15380e",
+      "target_type": "file",
+      "content": "File 'USE_GUIDE.md' (unknown). (83 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "unknown",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "50750b8eb1c91d9a",
+      "target_id": "2a873fb71082c24e",
+      "target_type": "file",
+      "content": "File 'semantic_index.json' (unknown). (1968 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "unknown",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "996219f540f8d94f",
+      "target_id": "ce7f8fcbdf6d56e7",
+      "target_type": "file",
+      "content": "File 'snapshot.json' (unknown). (2112 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "unknown",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "a9d0e254f8ec0c7d",
+      "target_id": "ba868db24a5bd734",
+      "target_type": "file",
+      "content": "File 'tasks.py' (python). Contains function(s): build_tasks. (101 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "31fca7cfd00fd791",
+      "target_id": "69ca1a0099bdec79",
+      "target_type": "file",
+      "content": "File '__init__.py' (python). (1 lines)",
+      "level": "file",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {
+        "pull request": "Yêu cầu hợp nhất thay đổi mã nguồn vào nhánh chính",
+        "code review": "Quy trình kiểm tra, đánh giá chất lượng mã nguồn",
+        "agent": "Tác nhân AI đảm nhận vai trò cụ thể trong quy trình đánh giá",
+        "multi-agent": "Hệ thống nhiều tác nhân AI cộng tác để hoàn thành nhiệm vụ",
+        "code quality": "Chất lượng mã nguồn dựa trên các tiêu chuẩn và thực tiễn tốt",
+        "GitHub": "Nền tảng lưu trữ mã nguồn và quản lý phiên bản",
+        "PR comment": "Nhận xét được đăng tự động lên pull request sau khi đánh giá"
+      }
+    },
+    {
+      "summary_id": "26c1fad2517645f1",
+      "target_id": "99dff3d2f031757b",
+      "target_type": "symbol",
+      "content": "Function 'in()'. defined at line 23. (86 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "f953aec8bfcdf99a",
+      "target_id": "ac446fbace2e33e3",
+      "target_type": "symbol",
+      "content": "Constant 'OPENAI_API_KEY'. (1 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "583bf4dbc5640ba1",
+      "target_id": "4d01c786cfe0c686",
+      "target_type": "symbol",
+      "content": "Constant 'OPENAI_API_BASE'. (1 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "52ee749542af6d0a",
+      "target_id": "bcfc338cb6382e97",
+      "target_type": "symbol",
+      "content": "Constant 'OPENAI_API_KEY'. (1 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "3f5d019ba37a0a38",
+      "target_id": "ad0bcaab96972daa",
+      "target_type": "symbol",
+      "content": "Constant 'OPENAI_API_BASE'. (1 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "1a5bbf611c06dcb4",
+      "target_id": "31cd9678600e2820",
+      "target_type": "symbol",
+      "content": "Constant 'LLM_MODEL'. (1 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "0ccbd7fadab9ad9f",
+      "target_id": "2a15aac7a72a104b",
+      "target_type": "symbol",
+      "content": "Constant 'GITHUB_TOKEN'. (1 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "d9cf6242f0c8a6d7",
+      "target_id": "78f0d6565081d461",
+      "target_type": "symbol",
+      "content": "Class 'GitHubClient'. with 7 method(s). (126 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "870894c17515b1b8",
+      "target_id": "ebe418aa778f5f77",
+      "target_type": "symbol",
+      "content": "Constant 'BASE_URL'. (1 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "21a90cc6cd9ea030",
+      "target_id": "fc2384faf2f7e395",
+      "target_type": "symbol",
+      "content": "Method '__init__'. defined at line 14. (7 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "d35ecade780212c8",
+      "target_id": "727ba20995c79201",
+      "target_type": "symbol",
+      "content": "Method 'parse_pr_url'. defined at line 23. (19 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "cff371617addf386",
+      "target_id": "9cc011e7666f83a6",
+      "target_type": "symbol",
+      "content": "Method 'fetch_pr_files'. defined at line 43. (26 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "b3cb688ea0f29126",
+      "target_id": "e3e6376f9c02c75f",
+      "target_type": "symbol",
+      "content": "Method 'fetch_pr_diff'. defined at line 70. (7 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "a9efa3f4f4572293",
+      "target_id": "9d6ac61889907c92",
+      "target_type": "symbol",
+      "content": "Method 'fetch_pr_title_and_body'. defined at line 78. (7 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "7d478ba1996fb990",
+      "target_id": "db986cf259804867",
+      "target_type": "symbol",
+      "content": "Method 'post_comment'. defined at line 86. (6 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "e27cfcc2f4413ff9",
+      "target_id": "8ff694551bf36887",
+      "target_type": "symbol",
+      "content": "Method 'get_pr_code_for_review'. (42 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    },
+    {
+      "summary_id": "fb70a79a85c65bba",
+      "target_id": "a86bef1e91751e1e",
+      "target_type": "symbol",
+      "content": "Function 'build_tasks'. defined at line 8. (94 lines)",
+      "level": "symbol",
+      "generated_by": "llm",
+      "language": "python",
+      "metadata": {}
+    }
+  ],
+  "conventions": [
+    {
+      "convention_id": "b5e83ed07d250e9d",
+      "convention_type": "naming_pattern",
+      "name": "Python snake_case file naming",
+      "description": "Python files follow snake_case naming convention",
+      "evidence": [
+        "main.py",
+        "test_api.py",
+        "agents/agents.py",
+        "agents/__init__.py",
+        "config/settings.py",
+        "config/__init__.py",
+        "github_utils/client.py",
+        "github_utils/__init__.py",
+        "tasks/tasks.py",
+        "tasks/__init__.py"
+      ],
+      "confidence": 1.0,
+      "affected_files": [
+        "main.py",
+        "test_api.py",
+        "agents/agents.py",
+        "agents/__init__.py",
+        "config/settings.py",
+        "config/__init__.py",
+        "github_utils/client.py",
+        "github_utils/__init__.py",
+        "tasks/tasks.py",
+        "tasks/__init__.py"
+      ],
+      "affected_symbols": []
+    },
+    {
+      "convention_id": "dfd095ac0d98d10d",
+      "convention_type": "naming_pattern",
+      "name": "PascalCase class naming",
+      "description": "Classes follow PascalCase naming convention",
+      "evidence": [
+        "GitHubClient"
+      ],
+      "confidence": 1.0,
+      "affected_files": [],
+      "affected_symbols": []
+    },
+    {
+      "convention_id": "4a5bf69b2ec77aa7",
+      "convention_type": "module_structure",
+      "name": "Python package modules",
+      "description": "Modules are organized as Python packages with __init__.py files",
+      "evidence": [
+        "agents/__init__.py",
+        "config/__init__.py",
+        "github_utils/__init__.py",
+        "tasks/__init__.py"
+      ],
+      "confidence": 0.9,
+      "affected_files": [
+        "agents/__init__.py",
+        "config/__init__.py",
+        "github_utils/__init__.py",
+        "tasks/__init__.py"
+      ],
+      "affected_symbols": []
+    },
+    {
+      "convention_id": "bf6213ce256e0844",
+      "convention_type": "service_repository_pattern",
+      "name": "Controller pattern",
+      "description": "Codebase uses controller pattern for separation of concerns",
+      "evidence": [
+        "test_api.py"
+      ],
+      "confidence": 0.8,
+      "affected_files": [
+        "test_api.py"
+      ],
+      "affected_symbols": [
+        "ac446fbace2e33e3",
+        "4d01c786cfe0c686",
+        "bcfc338cb6382e97",
+        "ad0bcaab96972daa"
+      ]
+    },
+    {
+      "convention_id": "9d06ca78117fc2f5",
+      "convention_type": "service_repository_pattern",
+      "name": "Model pattern",
+      "description": "Codebase uses model pattern for separation of concerns",
+      "evidence": [
+        "31cd9678600e2820"
+      ],
+      "confidence": 0.6,
+      "affected_files": [],
+      "affected_symbols": [
+        "31cd9678600e2820"
+      ]
+    },
+    {
+      "convention_id": "cd2c27a351314ad4",
+      "convention_type": "config_organization",
+      "name": "Centralized configuration",
+      "description": "Configuration is organized in dedicated config files",
+      "evidence": [
+        ".env.example",
+        "config/settings.py",
+        "config/__init__.py"
+      ],
+      "confidence": 0.9,
+      "affected_files": [
+        ".env.example",
+        "config/settings.py",
+        "config/__init__.py"
+      ],
+      "affected_symbols": []
+    },
+    {
+      "convention_id": "0f9c457ba612b2d4",
+      "convention_type": "entrypoint_pattern",
+      "name": "CLI entrypoint",
+      "description": "Application has defined CLI entry points",
+      "evidence": [
+        "main.py"
+      ],
+      "confidence": 0.95,
+      "affected_files": [
+        "main.py"
+      ],
+      "affected_symbols": []
+    }
+  ],
+  "risks": [
+    {
+      "risk_id": "f19f52ddf068dbbf",
+      "category": "authentication",
+      "name": "Authentication in main.py",
+      "description": "Detected authentication operations in main.py",
+      "file_path": "main.py",
+      "symbol_name": "in()",
+      "line_range": [
+        18,
+        32
+      ],
+      "evidence": [
+        "from config.settings import GITHUB_TOKEN",
+        "# --- Validate GitHub token ---"
+      ],
+      "confidence": 0.85,
+      "severity": "high"
+    },
+    {
+      "risk_id": "f2f03da942802a74",
+      "category": "database_write",
+      "name": "Database Write in main.py",
+      "description": "Detected database write operations in main.py",
+      "file_path": "main.py",
+      "symbol_name": null,
+      "line_range": [
+        13,
+        13
+      ],
+      "evidence": [
+        "sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))"
+      ],
+      "confidence": 0.75,
+      "severity": "medium"
+    },
+    {
+      "risk_id": "bbf9722aca01da87",
+      "category": "external_api",
+      "name": "External Api in main.py",
+      "description": "Detected external api operations in main.py",
+      "file_path": "main.py",
+      "symbol_name": "in()",
+      "line_range": [
+        54,
+        54
+      ],
+      "evidence": [
+        "# --- Fetch PR code ---"
+      ],
+      "confidence": 0.85,
+      "severity": "medium"
+    },
+    {
+      "risk_id": "90a1d14077d6e6ab",
+      "category": "file_system_write",
+      "name": "File System Write in main.py",
+      "description": "Detected file system write operations in main.py",
+      "file_path": "main.py",
+      "symbol_name": "in()",
+      "line_range": [
+        103,
+        103
+      ],
+      "evidence": [
+        "with open(output_path, \"w\", encoding=\"utf-8\") as f:"
+      ],
+      "confidence": 0.85,
+      "severity": "medium"
+    },
+    {
+      "risk_id": "0ea81c7014875fbc",
+      "category": "config_secrets",
+      "name": "Config Secrets in main.py",
+      "description": "Detected config secrets operations in main.py",
+      "file_path": "main.py",
+      "symbol_name": "in()",
+      "line_range": [
+        8,
+        34
+      ],
+      "evidence": [
+        "os.environ.setdefault(\"PYTHONIOENCODING\", \"utf-8\")",
+        "print(\"❌ GITHUB_TOKEN not configured. Please set it in .env file.\")"
+      ],
+      "confidence": 0.85,
+      "severity": "high"
+    },
+    {
+      "risk_id": "93d96d2931ddc234",
+      "category": "authorization",
+      "name": "Authorization in test_api.py",
+      "description": "Detected authorization operations in test_api.py",
+      "file_path": "test_api.py",
+      "symbol_name": null,
+      "line_range": [
+        22,
+        22
+      ],
+      "evidence": [
+        "agent = Agent(role=\"Reviewer\", goal=\"Say hello\", backstory=\"You are helpful.\", llm=model, verbose=Tr"
+      ],
+      "confidence": 0.75,
+      "severity": "high"
+    },
+    {
+      "risk_id": "53edf247cc3c1279",
+      "category": "database_write",
+      "name": "Database Write in test_api.py",
+      "description": "Detected database write operations in test_api.py",
+      "file_path": "test_api.py",
+      "symbol_name": null,
+      "line_range": [
+        3,
+        3
+      ],
+      "evidence": [
+        "sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))"
+      ],
+      "confidence": 0.75,
+      "severity": "medium"
+    },
+    {
+      "risk_id": "bdee27182981af62",
+      "category": "config_secrets",
+      "name": "Config Secrets in test_api.py",
+      "description": "Detected config secrets operations in test_api.py",
+      "file_path": "test_api.py",
+      "symbol_name": null,
+      "line_range": [
+        8,
+        17
+      ],
+      "evidence": [
+        "from dotenv import load_dotenv",
+        "load_dotenv()",
+        "os.environ[\"OPENAI_API_KEY\"] = os.getenv(\"OPENAI_API_KEY\")",
+        "os.environ[\"OPENAI_BASE_URL\"] = os.getenv(\"OPENAI_API_BASE\")",
+        "model = os.getenv(\"LLM_MODEL\", \"llama-3.1-8b-instant\")"
+      ],
+      "confidence": 0.85,
+      "severity": "high"
+    },
+    {
+      "risk_id": "4d38296afe47a403",
+      "category": "authorization",
+      "name": "Authorization in agents/agents.py",
+      "description": "Detected authorization operations in agents/agents.py",
+      "file_path": "agents/agents.py",
+      "symbol_name": null,
+      "line_range": [
+        15,
+        51
+      ],
+      "evidence": [
+        "role=\"Senior Code Reviewer\",",
+        "role=\"Application Security Engineer\",",
+        "role=\"Performance Optimization Engineer\",",
+        "role=\"Technical Lead\","
+      ],
+      "confidence": 0.85,
+      "severity": "high"
+    },
+    {
+      "risk_id": "4a384b2f21150517",
+      "category": "config_secrets",
+      "name": "Config Secrets in agents/agents.py",
+      "description": "Detected config secrets operations in agents/agents.py",
+      "file_path": "agents/agents.py",
+      "symbol_name": "OPENAI_API_KEY",
+      "line_range": [
+        11,
+        12
+      ],
+      "evidence": [
+        "os.environ[\"OPENAI_API_KEY\"] = OPENAI_API_KEY",
+        "os.environ[\"OPENAI_BASE_URL\"] = OPENAI_API_BASE"
+      ],
+      "confidence": 0.85,
+      "severity": "high"
+    },
+    {
+      "risk_id": "7376d9d90b995ff5",
+      "category": "authentication",
+      "name": "Authentication in config/settings.py",
+      "description": "Detected authentication operations in config/settings.py",
+      "file_path": "config/settings.py",
+      "symbol_name": "GITHUB_TOKEN",
+      "line_range": [
+        15,
+        15
+      ],
+      "evidence": [
+        "GITHUB_TOKEN = os.getenv(\"GITHUB_TOKEN\", \"\")"
+      ],
+      "confidence": 0.7999999999999999,
+      "severity": "high"
+    },
+    {
+      "risk_id": "c98aa4543dad9ee2",
+      "category": "config_secrets",
+      "name": "Config Secrets in config/settings.py",
+      "description": "Detected config secrets operations in config/settings.py",
+      "file_path": "config/settings.py",
+      "symbol_name": "OPENAI_API_KEY",
+      "line_range": [
+        4,
+        15
+      ],
+      "evidence": [
+        "from dotenv import load_dotenv",
+        "# Load environment variables from .env file",
+        "load_dotenv()",
+        "OPENAI_API_KEY = os.getenv(\"OPENAI_API_KEY\", \"sk-your-api-key-here\")",
+        "OPENAI_API_BASE = os.getenv(\"OPENAI_API_BASE\", \"https://api.openai.com/v1\")"
+      ],
+      "confidence": 0.8999999999999999,
+      "severity": "high"
+    },
+    {
+      "risk_id": "0284d2565feb51d7",
+      "category": "authentication",
+      "name": "Authentication in github_utils/client.py",
+      "description": "Detected authentication operations in github_utils/client.py",
+      "file_path": "github_utils/client.py",
+      "symbol_name": "GitHubClient",
+      "line_range": [
+        14,
+        14
+      ],
+      "evidence": [
+        "def __init__(self, token: str):"
+      ],
+      "confidence": 0.85,
+      "severity": "high"
+    },
+    {
+      "risk_id": "af8dd789c7522077",
+      "category": "external_api",
+      "name": "External Api in github_utils/client.py",
+      "description": "Detected external api operations in github_utils/client.py",
+      "file_path": "github_utils/client.py",
+      "symbol_name": "GitHubClient",
+      "line_range": [
+        1,
+        10
+      ],
+      "evidence": [
+        "\"\"\"GitHub API client for fetching PR files and posting review comments.\"\"\"",
+        "import httpx",
+        "\"\"\"Simple GitHub API client using httpx.\"\"\""
+      ],
+      "confidence": 0.95,
+      "severity": "medium"
+    },
+    {
+      "risk_id": "db4f87dcf7b05258",
+      "category": "config_secrets",
+      "name": "Config Secrets in github_utils/client.py",
+      "description": "Detected config secrets operations in github_utils/client.py",
+      "file_path": "github_utils/client.py",
+      "symbol_name": "GitHubClient",
+      "line_range": [
+        15,
+        15
+      ],
+      "evidence": [
+        "self.token = token"
+      ],
+      "confidence": 0.85,
+      "severity": "high"
+    },
+    {
+      "risk_id": "6bd20caf1c4c3d37",
+      "category": "database_write",
+      "name": "Database Write in tasks/tasks.py",
+      "description": "Detected database write operations in tasks/tasks.py",
+      "file_path": "tasks/tasks.py",
+      "symbol_name": "build_tasks",
+      "line_range": [
+        15,
+        15
+      ],
+      "evidence": [
+        "List of 4 Task objects to be executed sequentially."
+      ],
+      "confidence": 0.85,
+      "severity": "medium"
+    },
+    {
+      "risk_id": "f93af93e9bec2ae3",
+      "category": "config_secrets",
+      "name": "Config Secrets in tasks/tasks.py",
+      "description": "Detected config secrets operations in tasks/tasks.py",
+      "file_path": "tasks/tasks.py",
+      "symbol_name": "build_tasks",
+      "line_range": [
+        47,
+        47
+      ],
+      "evidence": [
+        "\"- Hardcoded secrets and credentials\\n\""
+      ],
+      "confidence": 0.85,
+      "severity": "high"
+    }
+  ],
+  "glossary": {
+    "entries": [
+      {
+        "term": "PR",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "main.py",
+          "main.py",
+          "main.py"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "OPENAI_API_KEY",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          ".env.example",
+          "README.md",
+          "README.md"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "OPENAI_API_BASE",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          ".env.example",
+          "README.md",
+          "README.md"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "README",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "README.md",
+          "knowledge_base/CrewAI_Review_Bot/latest.json",
+          "knowledge_base/CrewAI_Review_Bot/latest.json"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "GITHUB_TOKEN",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          ".env.example",
+          "main.py",
+          "main.py"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "LLM_MODEL",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          ".env.example",
+          "README.md",
+          "README.md"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "BASE_URL",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "github_utils/client.py",
+          "github_utils/client.py",
+          "github_utils/client.py"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "LLM",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          ".env.example",
+          "README.md",
+          "README.md"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "OPENAI_BASE_URL",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "README.md",
+          "README.md",
+          "test_api.py"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "BLOCKING",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "README.md",
+          "README.md",
+          "knowledge_base/CrewAI_Review_Bot/latest.json"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "MB",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "install_log.txt",
+          "install_log.txt",
+          "install_log.txt"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "GPT",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "README.md",
+          "README.md",
+          "README.md"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "CLI",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "main.py",
+          "knowledge_base/CrewAI_Review_Bot/latest.json",
+          "knowledge_base/CrewAI_Review_Bot/latest.json"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "PEP",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "README.md",
+          "agents/agents.py",
+          "knowledge_base/CrewAI_Review_Bot/latest.json"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "NON",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "README.md",
+          "knowledge_base/CrewAI_Review_Bot/latest.json",
+          "knowledge_base/CrewAI_Review_Bot/snapshots/2026-05-06/snapshot.json"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "SRV",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "install.bat",
+          "run.bat",
+          "knowledge_base/CrewAI_Review_Bot/latest.json"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "DONE",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "install.bat",
+          "install_log.txt",
+          "knowledge_base/CrewAI_Review_Bot/latest.json"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "REQUEST",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "README.md",
+          "knowledge_base/CrewAI_Review_Bot/latest.json",
+          "knowledge_base/CrewAI_Review_Bot/snapshots/2026-05-06/snapshot.json"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "CHANGES",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "README.md",
+          "knowledge_base/CrewAI_Review_Bot/latest.json",
+          "knowledge_base/CrewAI_Review_Bot/snapshots/2026-05-06/snapshot.json"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "OWASP",
+        "definition": "Acronym/constant used in 3 files",
+        "category": "acronym",
+        "context": [
+          "agents/agents.py",
+          "knowledge_base/CrewAI_Review_Bot/latest.json",
+          "knowledge_base/CrewAI_Review_Bot/snapshots/2026-05-06/snapshot.json"
+        ],
+        "languages": {},
+        "confidence": 0.6,
+        "source": "heuristic"
+      },
+      {
+        "term": "Knowledge Base",
+        "definition": "Module/directory concept (in 5 paths)",
+        "category": "domain",
+        "context": [],
+        "languages": {},
+        "confidence": 0.4,
+        "source": "heuristic"
+      },
+      {
+        "term": "Crewai Review Bot",
+        "definition": "Module/directory concept (in 5 paths)",
+        "category": "domain",
+        "context": [],
+        "languages": {},
+        "confidence": 0.4,
+        "source": "heuristic"
+      },
+      {
+        "term": "  Init  ",
+        "definition": "Module/directory concept (in 4 paths)",
+        "category": "domain",
+        "context": [],
+        "languages": {},
+        "confidence": 0.4,
+        "source": "heuristic"
+      },
+      {
+        "term": "Agents",
+        "definition": "Module/directory concept (in 3 paths)",
+        "category": "domain",
+        "context": [],
+        "languages": {},
+        "confidence": 0.4,
+        "source": "heuristic"
+      },
+      {
+        "term": "Tasks",
+        "definition": "Module/directory concept (in 3 paths)",
+        "category": "domain",
+        "context": [],
+        "languages": {},
+        "confidence": 0.4,
+        "source": "heuristic"
+      },
+      {
+        "term": "Config",
+        "definition": "Module/directory concept (in 2 paths)",
+        "category": "domain",
+        "context": [],
+        "languages": {},
+        "confidence": 0.4,
+        "source": "heuristic"
+      },
+      {
+        "term": "Github Utils",
+        "definition": "Module/directory concept (in 2 paths)",
+        "category": "domain",
+        "context": [],
+        "languages": {},
+        "confidence": 0.4,
+        "source": "heuristic"
+      }
+    ],
+    "project_name": "",
+    "language_hint": ""
+  }
+}
