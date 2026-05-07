@@ -1,26 +1,27 @@
-# 🔧 Plan Fix Issues — PR Review Bot
+# 🔧 Fix Issues — PR Review Bot (Đã triển khai ✅)
 
-> Dựa trên review từ Qwen3 Coder 480B trên PR #3
+> Dựa trên review từ Qwen3 Coder 480B trên PR #3  
+> **Status:** Tất cả fixes đã được triển khai.
 
 ## Phân Tách Issues: Valid vs Invalid
 
-### ✅ VALID — Cần Fix
+### ✅ VALID — Đã Fix
 
-| # | Issue | File | Line | Severity | Đánh giá |
-|---|-------|------|------|----------|----------|
-| 1 | **KB JSON Schema Validation** | `kb_loader.py` | 37 | BLOCKING | `json.load()` không validate structure. Nên check schema cơ bản. |
-| 2 | **KB_MAX_CHARS crash** | `config/settings.py` | 19 | BLOCKING | `int(os.getenv("KB_MAX_CHARS", "8000"))` sẽ crash nếu env var không phải số. |
-| 3 | **KB Truncation off-by-one** | `kb_loader.py` | 78 | NON-BLOCKING | Append warning message làm result vượt quá `max_chars`. |
-| 4 | **Verdict Regex robustness** | `main.py` | 38 | NON-BLOCKING | Regex chỉ match "REQUEST CHANGES" (space), không match "REQUEST_CHANGES" (underscore). Fallback keyword search xử lý được nhưng regex nên cover cả hai. |
-| 5 | **Fallback chain logging** | `main.py` | 179-191 | NON-BLOCKING | Error messages cơ bản, thiếu chi tiết để debug. |
+| # | Issue | File | Severity | Status |
+|---|-------|------|----------|--------|
+| 1 | **KB JSON Schema Validation** | `kb_loader.py` | BLOCKING | ✅ Đã fix — Thêm `_validate_kb_schema()` |
+| 2 | **KB_MAX_CHARS crash** | `config/settings.py` | BLOCKING | ✅ Đã fix — `try/except (ValueError, TypeError)` |
+| 3 | **KB Truncation off-by-one** | `kb_loader.py` | NON-BLOCKING | ✅ Đã fix — Truncate预留 warning length |
+| 4 | **Verdict Regex robustness** | `main.py` | NON-BLOCKING | ✅ Đã fix — Regex match cả space và underscore |
+| 5 | **Fallback chain logging** | `main.py` | NON-BLOCKING | ✅ Đã fix — Thêm `type(e).__name__` trong error messages |
 
 ### ❌ INVALID / WON'T FIX — False Positives
 
 | # | Issue | Lý do không fix |
 |---|-------|-----------------|
-| 6 | **IDOR in GitHub client** (`client.py` lines 98, 119) | **False positive.** `owner`, `repo`, `pr_number` đến từ CLI args, không phải untrusted user input. GitHub token scopes đã kiểm soát authorization. |
-| 7 | **Insecure Deserialization** (`kb_loader.py` line 27) | **False positive.** `json.load()` KHÔNG phải insecure deserialization (đó là `pickle`). JSON parser an toàn, không execute code. |
-| 8 | **Hardcoded strings** (`main.py` line 40) | Style preference, không phải bug. Regex là constant de facto. |
+| 6 | **IDOR in GitHub client** (`client.py`) | **False positive.** `owner`, `repo`, `pr_number` đến từ CLI args, không phải untrusted user input. GitHub token scopes đã kiểm soát authorization. |
+| 7 | **Insecure Deserialization** (`kb_loader.py`) | **False positive.** `json.load()` KHÔNG phải insecure deserialization (đó là `pickle`). JSON parser an toàn, không execute code. |
+| 8 | **Hardcoded strings** (`main.py`) | Style preference, không phải bug. Regex là constant de facto. |
 | 9 | **Missing type hints** (`main.py`) | Style preference, project không dùng type checking. |
 | 10 | **Emoji in error messages** (`kb_loader.py`) | Intentional — CLI output cho người dùng. |
 | 11 | **String concatenation efficiency** (`tasks/tasks.py`) | Micro-optimization, negligible impact. |
@@ -28,37 +29,29 @@
 
 ---
 
-## Chi Tiết Fix
+## Chi Tiết Các Fix Đã Triển Khai
 
-### Fix 1: KB JSON Schema Validation (`kb_loader.py`)
+### Fix 1: KB JSON Schema Validation (`kb_loader.py`) ✅
 
-**Vấn đề:** `json.load()` không kiểm tra data structure. Nếu file JSON bị corrupt hoặc sai format, code sẽ crash ở các dòng sau khi access `data.get("files", [])`.
-
-**Fix:** Thêm validate function sau khi load JSON:
+**Thêm function `_validate_kb_schema()`:**
 
 ```python
-def _validate_kb_schema(data: dict) -> bool:
-    """Basic schema validation for KB data."""
+def _validate_kb_schema(data) -> bool:
+    """Validate basic KB JSON schema."""
     if not isinstance(data, dict):
         return False
-    # Must have at least 'files' key
     if "files" not in data:
         return False
-    # files must be a list
     if not isinstance(data.get("files"), list):
         return False
     return True
 ```
 
-**Location:** Sau line 37, trước khi build maps.
+Được gọi sau `json.load()` để validate structure trước khi process data.
 
 ---
 
-### Fix 2: KB_MAX_CHARS Safe Parsing (`config/settings.py`)
-
-**Vấn đề:** `int(os.getenv("KB_MAX_CHARS", "8000"))` sẽ throw `ValueError` nếu env var không phải integer.
-
-**Fix:**
+### Fix 2: KB_MAX_CHARS Safe Parsing (`config/settings.py`) ✅
 
 ```python
 try:
@@ -69,11 +62,7 @@ except (ValueError, TypeError):
 
 ---
 
-### Fix 3: KB Truncation Off-By-One (`kb_loader.py`)
-
-**Vấn đề:** `result[:max_chars] + "\n\n... (KB truncated)"` làm result dài hơn `max_chars`.
-
-**Fix:**
+### Fix 3: KB Truncation Off-By-One (`kb_loader.py`) ✅
 
 ```python
 if len(result) > max_chars:
@@ -81,48 +70,36 @@ if len(result) > max_chars:
     result = result[:max_chars - len(warning)] + warning
 ```
 
+Giờ `result` luôn ≤ `max_chars`.
+
 ---
 
-### Fix 4: Verdict Regex Robustness (`main.py`)
-
-**Vấn đề:** Regex `REQUEST\s+CHANGES` chỉ match "REQUEST CHANGES" (space), không match "REQUEST_CHANGES" (underscore). Dù fallback keyword search xử lý được, regex nên cover cả hai format.
-
-**Fix:**
+### Fix 4: Verdict Regex Robustness (`main.py`) ✅
 
 ```python
-match = re.search(r"VERDICT:\s*(APPROVE|REQUEST[\s_]+CHANGES)", review_text, re.IGNORECASE)
+match = re.search(r"VERDICT:\s*(APPROVE|REQUEST[ _]CHANGES)", review_text, re.IGNORECASE)
 ```
+
+Match cả `REQUEST CHANGES` (space) và `REQUEST_CHANGES` (underscore).
 
 ---
 
-### Fix 5: Fallback Chain Logging (`main.py`)
-
-**Vấn đề:** Error messages trong fallback chain thiếu chi tiết.
-
-**Fix:** Thêm `logging` module hoặc cải thiện error messages:
+### Fix 5: Fallback Chain Logging (`main.py`) ✅
 
 ```python
 except Exception as e:
-    print(f"⚠️ Formal review failed: {type(e).__name__}: {e}")
+    print(f"⚠️ Formal review failed [{type(e).__name__}]: {e}")
     print("   Falling back to issue comment...")
 ```
 
----
-
-## Thứ Tự Thực Hiện
-
-1. ✅ **Fix 2** (config/settings.py) — Dễ nhất, 1 dòng
-2. ✅ **Fix 3** (kb_loader.py truncation) — 1 dòng
-3. ✅ **Fix 4** (main.py regex) — 1 dòng  
-4. ✅ **Fix 5** (main.py logging) — 2-3 dòng
-5. ✅ **Fix 1** (kb_loader.py schema validation) — Thêm function mới
+Hiển thị cả exception type và message để dễ debug.
 
 ---
 
-## Files Cần Sửa
+## Files Đã Sửa
 
-| File | Fixes | Lines thay đổi |
-|------|-------|---------------|
-| `config/settings.py` | Fix 2 | ~3 lines |
-| `kb_loader.py` | Fix 1, Fix 3 | ~15 lines |
-| `main.py` | Fix 4, Fix 5 | ~5 lines |
+| File | Fixes | Status |
+|------|-------|--------|
+| `config/settings.py` | Fix 2 (safe KB_MAX_CHARS) | ✅ |
+| `kb_loader.py` | Fix 1 (schema validation), Fix 3 (truncation) | ✅ |
+| `main.py` | Fix 4 (regex), Fix 5 (logging) | ✅ |
