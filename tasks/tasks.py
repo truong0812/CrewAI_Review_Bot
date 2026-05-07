@@ -3,6 +3,7 @@
 from crewai import Task
 
 from agents.agents import code_reviewer, security_expert, performance_engineer, tech_lead
+from config.settings import REVIEW_LANGUAGE
 
 
 def build_tasks(code: str, knowledge_base: str = "") -> list[Task]:
@@ -26,6 +27,17 @@ def build_tasks(code: str, knowledge_base: str = "") -> list[Task]:
             + "Use the above Project Knowledge Base to inform your review. "
             "Check code changes against the project's coding conventions, "
             "risk areas, and existing file summaries.\n\n"
+        )
+
+    # Build language instruction
+    lang_names = {"en": "English", "vi": "Vietnamese", "ja": "Japanese"}
+    lang_label = lang_names.get(REVIEW_LANGUAGE, REVIEW_LANGUAGE)
+    language_block = ""
+    if REVIEW_LANGUAGE != "en":
+        language_block = (
+            f"\n\n**LANGUAGE:** Write the ENTIRE review in {lang_label}. "
+            f"All section headers, explanations, and comments must be in {lang_label}. "
+            f"Keep code snippets and file names as-is (do not translate code)."
         )
 
     review_code_quality = Task(
@@ -144,11 +156,33 @@ def build_tasks(code: str, knowledge_base: str = "") -> list[Task]:
             "1. Code Quality Review\n"
             "2. Security Audit\n"
             "3. Performance Analysis\n\n"
-            "Create a structured markdown PR review comment that includes:\n"
-            "- A summary table of all VALID issues found\n"
-            "- Issues categorized as BLOCKING (must fix) or NON-BLOCKING (nice to have)\n"
-            "- A final verdict: APPROVE or REQUEST CHANGES\n"
-            "- Prioritized action items\n\n"
+            "**OUTPUT FORMAT:**\n\n"
+            "If NO valid issues were found, output ONLY this (no tables, no sections, nothing else):\n"
+            "```\n"
+            "### PR Review Bot — LGTM! ✅\n\n"
+            "Code looks good. No issues found across code quality, security, and performance.\n\n"
+            "VERDICT: APPROVE\n"
+            "```\n\n"
+            "If issues WERE found, use this structure:\n"
+            "```\n"
+            "### PR Review Bot — Code Review\n\n"
+            "**TL;DR:** {{X blocking, Y suggestions}} — {{one-line summary of the most important finding}}\n\n"
+            "---\n\n"
+            "**🔴 Must Fix ({{blocking_count}})**\n"
+            "- `file.py:42` — {{short description}} ({{Category}}: {{Severity}})\n"
+            "  ```\n"
+            "  {{problematic code snippet}}\n"
+            "  ```\n"
+            "  Fix: {{how to fix}}\n\n"
+            "---\n\n"
+            "**🟡 Suggestions ({{non_blocking_count}})**\n"
+            "- `file.py:15` — {{short description}} ({{Category}}: {{Severity}})\n\n"
+            "---\n\n"
+            "VERDICT: APPROVE  (or VERDICT: REQUEST CHANGES)\n"
+            "```\n\n"
+            "If there are NO blocking issues, omit the **Must Fix** section entirely.\n"
+            "If there are NO suggestions, omit the **Suggestions** section entirely.\n"
+            "Do NOT include empty sections.\n\n"
             "**IMPORTANT RULES:**\n"
             "- DISCARD any findings that are clearly false positives (e.g., flagging .env.example placeholders as secrets).\n"
             "- DISCARD findings about files not present in the code review.\n"
@@ -159,23 +193,24 @@ def build_tasks(code: str, knowledge_base: str = "") -> list[Task]:
             "- PROOF GATE: Before marking ANY issue as BLOCKING, verify the original finding includes concrete evidence (failing test / exploit scenario / benchmark data). If a finding lacks evidence, downgrade it to NON-BLOCKING regardless of the reviewer's severity rating.\n"
             "- A claim without evidence is a suggestion, not a bug. When in doubt, prefer APPROVE over REQUEST CHANGES.\n"
             "- For bug-fix PRs: If reviewers suggest reverting a fix but cannot prove the fix is wrong with a test case, DISCARD that finding entirely.\n\n"
-            "Be concise but thorough. Focus on the most important findings first.\n\n"
+            "Be concise. No filler text. No redundant summaries. Speak directly to the developer.\n\n"
             "**VERDICT RULES:**\n"
-            "- If only NON-BLOCKING issues exist → VERDICT: APPROVE\n"
+            "- If only NON-BLOCKING issues (or no issues) → VERDICT: APPROVE\n"
             "- If any BLOCKING issues exist → VERDICT: REQUEST CHANGES\n"
             "- You MUST include a line with exactly one of:\n"
             "  - `VERDICT: APPROVE`\n"
             "  - `VERDICT: REQUEST CHANGES`\n"
             "Place this on its own separate line at the very end of your review."
-        ),
+            "{language_block}"
+        ).format(language_block=language_block),
         expected_output=(
-            "A complete markdown PR review comment with: summary table of VALID issues only, "
-            "categorized issues (BLOCKING / NON-BLOCKING), final verdict, and prioritized action items. "
-            "BLOCKING issues MUST have concrete evidence backing them. Issues without proof must be "
-            "downgraded to NON-BLOCKING. "
-            "Must end with a line containing exactly 'VERDICT: APPROVE' or 'VERDICT: REQUEST CHANGES'. "
-            "False positives and duplicate findings must be filtered out. "
-            "The output should be ready to paste directly into a GitHub PR comment."
+            "A clean, human-readable markdown PR review comment. "
+            "When no issues found: short LGTM message. "
+            "When issues found: TL;DR summary + categorized bullet list with code snippets. "
+            "No empty sections, no redundant tables, no filler text. "
+            "BLOCKING issues MUST have concrete evidence. Issues without proof are NON-BLOCKING. "
+            "Must end with exactly 'VERDICT: APPROVE' or 'VERDICT: REQUEST CHANGES'. "
+            "Ready to paste into a GitHub PR comment."
         ),
         agent=tech_lead,
     )

@@ -204,50 +204,68 @@ class TestPerformanceAnalysisOutputFormat:
 
 
 class TestFinalReviewOutputFormat:
-    VALID_REVIEW = """\
-## 🤖 Automated PR Review
+    VALID_REVIEW_WITH_ISSUES = """\
+### PR Review Bot — Code Review
 
-### 📊 Summary
-| Category | Blocking | Non-Blocking | Total |
-|----------|----------|--------------|-------|
-| 🐛 Code Quality | 0 | 1 | 1 |
-| 🔒 Security | 0 | 0 | 0 |
-| ⚡ Performance | 0 | 0 | 0 |
+**TL;DR:** 1 blocking, 1 suggestion — SQL injection in query builder
 
-### 🟡 Non-Blocking Issues (Suggestions)
-- `main.py:10` — Unused import (minor style issue)
+---
 
-### ✅ Positive Notes
-- Code structure is clean
+**🔴 Must Fix (1)**
+- `db/query.py:42` — String interpolation in SQL query (Security: Critical)
+  ```python
+  query = f"SELECT * FROM users WHERE id = {user_id}"
+  ```
+  Fix: Use parameterized queries
 
-### 📋 Action Items
-1. Remove unused import in `main.py`
+---
+
+**🟡 Suggestions (1)**
+- `main.py:10` — Unused import (Code Quality: Minor)
+
+---
+
+VERDICT: REQUEST CHANGES
+"""
+
+    VALID_REVIEW_NO_ISSUES = """\
+### PR Review Bot — LGTM! ✅
+
+Code looks good. No issues found across code quality, security, and performance.
 
 VERDICT: APPROVE
 """
 
-    def test_has_summary_table(self):
-        assert "| Category" in self.VALID_REVIEW
-        assert "|----------|" in self.VALID_REVIEW
+    def test_has_tldr_when_issues(self):
+        assert "TL;DR:" in self.VALID_REVIEW_WITH_ISSUES
 
-    def test_has_blocking_section(self):
-        # Could be empty but section should exist
-        assert "Blocking" in self.VALID_REVIEW
+    def test_has_must_fix_section(self):
+        assert "Must Fix" in self.VALID_REVIEW_WITH_ISSUES
+
+    def test_has_suggestions_section(self):
+        assert "Suggestions" in self.VALID_REVIEW_WITH_ISSUES
 
     def test_has_verdict(self):
-        assert has_verdict(self.VALID_REVIEW)
+        assert has_verdict(self.VALID_REVIEW_WITH_ISSUES)
+        assert has_verdict(self.VALID_REVIEW_NO_ISSUES)
 
     def test_verdict_is_approve_or_request_changes(self):
-        match = re.search(r"VERDICT:\s*(APPROVE|REQUEST\s*CHANGES)", self.VALID_REVIEW)
+        match = re.search(r"VERDICT:\s*(APPROVE|REQUEST\s*CHANGES)", self.VALID_REVIEW_WITH_ISSUES)
         assert match is not None
 
-    def test_has_action_items(self):
-        assert "Action Items" in self.VALID_REVIEW
+    def test_issue_has_inline_location(self):
+        assert "`db/query.py:42`" in self.VALID_REVIEW_WITH_ISSUES
+
+    def test_no_issues_format_is_short(self):
+        lines = self.VALID_REVIEW_NO_ISSUES.strip().split("\n")
+        assert len(lines) <= 5
+        assert "LGTM" in self.VALID_REVIEW_NO_ISSUES
+
+    def test_approve_verdict(self):
+        assert "VERDICT: APPROVE" in self.VALID_REVIEW_NO_ISSUES
 
     def test_request_changes_verdict(self):
-        rc_review = self.VALID_REVIEW.replace("VERDICT: APPROVE", "VERDICT: REQUEST CHANGES")
-        assert "REQUEST CHANGES" in rc_review
-        assert has_verdict(rc_review)
+        assert "VERDICT: REQUEST CHANGES" in self.VALID_REVIEW_WITH_ISSUES
 
 
 # ============================================================

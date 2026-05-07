@@ -16,6 +16,9 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 API_TIMEOUT = int(os.getenv("API_TIMEOUT", "30"))
 REVIEW_OUTPUT_PATH = os.getenv("REVIEW_OUTPUT_PATH", "")
 
+# Review Configuration
+REVIEW_LANGUAGE = os.getenv("REVIEW_LANGUAGE", "en")
+
 # Knowledge Base Configuration
 KB_PATH = os.getenv("KB_PATH", "")
 try:

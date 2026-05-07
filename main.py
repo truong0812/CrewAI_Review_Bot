@@ -153,7 +153,7 @@ def main():
         event = "COMMENT"
 
     # --- Submit review to GitHub ---
-    review_body = f"## 🤖 PR Review Bot — Automated Code Review\n\n{result_str}"
+    review_body = result_str
 
     print()
     print("📤 Submitting review to GitHub PR...")
