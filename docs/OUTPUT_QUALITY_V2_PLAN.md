@@ -2,6 +2,7 @@
 
 > **Status:** 📝 Chờ triển khai
 > **Created:** 2026-05-07
+> **Updated:** 2026-05-07 (Added Testing Strategy, Error Handling, Performance Optimization)
 > **Based on:** Phân tích toàn bộ codebase hiện tại
 
 ---
@@ -25,6 +26,9 @@
 | 4 | **Output formatting không nhất quán** — mỗi lần chạy format khác nhau, đôi khi thiếu table hoặc verdict | 🟡 MEDIUM | `tasks/tasks.py` |
 | 5 | **Không tận dụng PR metadata** — không xem PR size, changed files count để điều chỉnh review depth | 🟡 MEDIUM | `client.py`, `main.py` |
 | 6 | **Review chỉ post 1 body comment lớn** — không có inline comments trên từng dòng code cụ thể | 🟢 LOW | `client.py`, `main.py` |
+| 7 | **Missing testing framework** — không có unit/integration tests để validate changes | 🔴 HIGH | All files |
+| 8 | **Poor error handling** — retry, fallback strategies khi API fail | 🔴 HIGH | `main.py`, `github_utils/client.py` |
+| 9 | **No performance throttling** — large PRs có thể timeout hoặc exceed limits | 🟡 MEDIUM | `main.py`, `config/settings.py` |
 
 ---
 
@@ -33,15 +37,138 @@
 ### Priority Order (Impact cao → thấp)
 
 ```
+Phase 0 (Testing Framework)    ████████████  Foundation for all changes
 Phase 2 (Structured Output)     ████████████  Impact cao nhất, dễ nhất
-Phase 3 (Context Passing)       ██████████    Giảm duplicate findings
-Phase 1 (Dynamic Context)       █████████     Fix truncate issue
+Phase 8 (Basic Metrics)        ██████████    Measure success of other phases
+Phase 3 (Context Passing)       █████████     Giảm duplicate findings
 Phase 5 (Enhanced Tech Lead)    ████████      Cải thiện synthesis
-Phase 6 (Post-Processing)       ███████       Ensure consistent output
+Phase 1 (Dynamic Context)       ███████       Fix truncate issue
 Phase 4 (PR Metadata)           ██████        Context-aware reviews
+Phase 6 (Post-Processing)       █████         Ensure consistent output
 Phase 7 (Inline Comments)       ████          UX improvement
-Phase 8 (Quality Metrics)       ███           Long-term tracking
+Phase 9 (Documentation)         ███           Developer experience
 ```
+
+---
+
+## Phase 0: Testing Framework (MUST-DO trước triển khai)
+
+**Mục tiêu:** Build comprehensive test suite để validate các changes trong các phases sau
+
+**Files cần tạo:**
+- `tests/` directory
+- `tests/test_agents.py`
+- `tests/test_tasks.py`
+- `tests/test_client.py`
+- `tests/test_main.py`
+- `tests/test_output_quality.py`
+
+### 0.1 Unit Tests
+
+**test_output_quality.py**
+```python
+import pytest
+from tasks.tasks import validate_output_format
+
+def test_structured_output_validation():
+    """Test structured output format compliance."""
+    valid_output = """
+## Code Quality Review
+### Issue 1: Unused Import
+- **File:** `main.py`
+- **Line:** 10
+- **Severity:** MINOR
+- **Category:** style
+- **Code:**
+  ```python
+  import unused_module
+  ```
+- **Problem:** Unused import
+- **Suggested Fix:**
+  ```python
+  # Remove unused import
+  ```
+"""
+    assert validate_output_format(valid_output, "code_quality") == True
+    
+    invalid_output = "Some random text without structure"
+    assert validate_output_format(invalid_output, "code_quality") == False
+```
+
+**test_client.py**
+```python
+def test_github_client_retry():
+    """Test retry mechanism for API failures."""
+    from github_utils.client import GitHubClient
+    
+    client = GitHubClient()
+    
+    # Test with mock failure
+    with pytest.raises(Exception):
+        client.get_pr_metadata("owner", "repo", 123)  # Mock failure
+    
+    # Should retry and eventually succeed or fail gracefully
+```
+
+### 0.2 Integration Tests
+
+```python
+def test_full_review_pipeline():
+    """Test complete review pipeline with mock PR data."""
+    # Mock PR data
+    mock_pr = {
+        "files": [
+            {"filename": "src/main.py", "patch": "+++ ..."},
+            {"filename": "tests/test_main.py", "patch": "+++ ..."}
+        ]
+    }
+    
+    # Run pipeline with mocked inputs
+    result = run_full_review(mock_pr)
+    
+    # Validate output structure
+    assert "VERDICT:" in result
+    assert "Summary" in result
+    assert "Blocking Issues" in result
+```
+
+### 0.3 Performance Tests
+
+```python
+def test_large_pr_handling():
+    """Test system behavior with large PRs."""
+    # Generate mock PR with 50+ files
+    large_pr = create_large_mock_pr(file_count=50)
+    
+    # Should not timeout
+    start = time.time()
+    result = run_full_review(large_pr)
+    elapsed = time.time() - start
+    
+    assert elapsed < 300  # < 5 minutes
+    assert len(result) > 0
+```
+
+### 0.4 Error Scenarios
+
+```python
+def test_error_scenarios():
+    """Test graceful handling of error scenarios."""
+    # Empty PR
+    assert handle_empty_pr() == "No files to review"
+    
+    # Binary files only
+    assert handle_binary_only_pr() == "Skipping binary files review"
+    
+    # API rate limit
+    assert handle_rate_limit() == "Retry after 60 seconds"
+```
+
+### Kết quả mong đợi
+- 100% test coverage cho core functionality
+- Test-driven implementation cho các phases sau
+- Early detection of integration issues
+- Performance benchmarks cho các threshold sizes
 
 ---
 
@@ -65,9 +192,49 @@ MAX_PATCH_CHARS = int(os.getenv("MAX_PATCH_CHARS", "10000"))  # Per-file limit
 # PR size thresholds
 SMALL_PR_THRESHOLD = int(os.getenv("SMALL_PR_THRESHOLD", "5"))    # < 5 files = small
 MEDIUM_PR_THRESHOLD = int(os.getenv("MEDIUM_PR_THRESHOLD", "15")) # < 15 files = medium
+
+# Performance throttling
+MAX_CONCURRENT_AGENTS = int(os.getenv("MAX_CONCURRENT_AGENTS", "4"))
+AGENT_TIMEOUT_SECONDS = int(os.getenv("AGENT_TIMEOUT_SECONDS", "45"))
+
+# Retry configuration
+MAX_RETRY_ATTEMPTS = int(os.getenv("MAX_RETRY_ATTEMPTS", "3"))
+RETRY_DELAY_SECONDS = int(os.getenv("RETRY_DELAY_SECONDS", "2"))
+
+# Configuration validation
+def validate_settings():
+    """Validate all settings are within reasonable bounds."""
+    if MAX_TOTAL_CHARS > 50000:
+        raise ValueError("MAX_TOTAL_CHARS too large - may exceed model context")
+    if MAX_PATCH_CHARS > 25000:
+        raise ValueError("MAX_PATCH_CHARS too large")
+    if SMALL_PR_THRESHOLD >= MEDIUM_PR_THRESHOLD:
+        raise ValueError("Thresholds must be SMALL < MEDIUM")
+    if MAX_CONCURRENT_AGENTS > 10:
+        raise ValueError("MAX_CONCURRENT_AGENTS too large")
+    if AGENT_TIMEOUT_SECONDS > 120:
+        raise ValueError("AGENT_TIMEOUT_SECONDS too large")
 ```
 
-### 1.2 Cập nhật `github_utils/client.py`
+### 1.2 Enhanced Error Handling & Retry Logic
+
+```python
+import time
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+@retry(
+    stop=stop_after_attempt(MAX_RETRY_ATTEMPTS),
+    wait=wait_exponential(multiplier=1, min=RETRY_DELAY_SECONDS, max=10),
+    retry_error_callback=lambda x: None
+)
+def _get_with_retry(self, url: str, **kwargs):
+    """Wrapper for GET requests with retry logic."""
+    resp = httpx.get(url, headers=self.headers, timeout=self.timeout, **kwargs)
+    resp.raise_for_status()
+    return resp
+```
+
+### 1.3 Cập nhật `github_utils/client.py`
 
 Thêm method `get_pr_metadata()`:
 
@@ -100,10 +267,38 @@ def _calculate_max_chars(self, file_count: int, base_max: int) -> int:
         return base_max * 2       # More space needed
 ```
 
+### 1.4 Performance Throttling
+
+```python
+def get_throttled_config(self, pr_size: str) -> dict:
+    """Get throttled configuration based on PR size."""
+    configs = {
+        "SMALL": {
+            "max_agents": MAX_CONCURRENT_AGENTS,
+            "timeout": AGENT_TIMEOUT_SECONDS,
+            "priority_files": []
+        },
+        "MEDIUM": {
+            "max_agents": MAX_CONCURRENT_AGENTS - 1,
+            "timeout": AGENT_TIMEOUT_SECONDS + 15,
+            "priority_files": ["main.py", "src/**/*.py"]
+        },
+        "LARGE": {
+            "max_agents": 2,  # Limit concurrent agents
+            "timeout": 30,    # Shorter timeout
+            "priority_files": ["src/**/*.py", "tests/**/*.py"],
+            "skip_patterns": ["config/*", "*.md", "docs/*"]
+        }
+    }
+    return configs.get(pr_size, configs["SMALL"])
+```
+
 ### Kết quả mong đợi
 - Small PR: review chi tiết 100% files
 - Medium PR: review đầy đủ, truncate ít quan trọng
 - Large PR: tăng context, skip config files, focus source code
+- All PRs: graceful retry on API failures
+- Configurable throttling based on PR size
 
 ---
 
@@ -601,7 +796,69 @@ else:
 
 ---
 
-## Phase 8: Review Quality Metrics & Logging
+## Phase 8: Basic Metrics (Foundation for Phase 8 Original)
+
+**Mục tiêu:** Collect essential metrics to track review quality and system performance
+
+**Files thay đổi:**
+- `config/settings.py` — Add metrics config
+- `main.py` — Basic metrics collection
+
+### 8.1 Metrics Configuration
+
+```python
+# In config/settings.py
+ENABLE_METRICS = os.getenv("ENABLE_METRICS", "true").lower() == "true"
+METRICS_FILE_PATH = os.getenv("METRICS_FILE_PATH", "review_metrics.jsonl")
+MAX_METRICS_SIZE = int(os.getenv("MAX_METRICS_SIZE", "10000"))  # Max lines in metrics file
+```
+
+### 8.2 Basic Metrics Collection
+
+```python
+# In main.py
+def log_basic_metrics(pr_metadata: dict, verdict: str, elapsed_time: float, file_count: int):
+    """Log basic metrics for quality tracking."""
+    if not ENABLE_METRICS:
+        return
+    
+    import json
+    from datetime import datetime
+    
+    metric = {
+        "timestamp": datetime.now().isoformat(),
+        "pr_files": pr_metadata.get("changed_files", 0),
+        "pr_additions": pr_metadata.get("additions", 0),
+        "pr_deletions": pr_metadata.get("deletions", 0),
+        "verdict": verdict,
+        "elapsed_seconds": round(elapsed_time, 2),
+        "files_reviewed": file_count,
+        "review_size": len(result_str) if 'result_str' in locals() else 0
+    }
+    
+    # Rotate metrics file if too large
+    if os.path.exists(METRICS_FILE_PATH):
+        with open(METRICS_FILE_PATH, "r") as f:
+            lines = f.readlines()
+        if len(lines) > MAX_METRICS_SIZE:
+            # Keep only last 5000 lines
+            with open(METRICS_FILE_PATH, "w") as f:
+                f.writelines(lines[-5000:])
+    
+    # Append new metric
+    with open(METRICS_FILE_PATH, "a", encoding="utf-8") as f:
+        f.write(json.dumps(metric) + "\n")
+```
+
+### Kết quả mong đợi
+- Track verdict distribution (APPROVE vs REQUEST CHANGES)
+- Monitor review execution time
+- Track PR sizes being reviewed
+- Basic quality trending
+
+---
+
+## Phase 8: Review Quality Metrics & Logging (Enhanced)
 
 **Mục tiêu:** Track review quality over time, debug issues
 
@@ -677,27 +934,83 @@ print(f"   📋 Issues: {metrics['review']['major_issues']} major, {metrics['rev
 
 ---
 
+## Phase 9: Documentation Updates
+
+**Mục tiêu:** Update documentation để developer hiểu và sử dụng các features mới
+
+**Files thay đổi:**
+- `README.md`
+- `docs/CONFIGURATION.md` (new)
+- `docs/EXAMPLES.md` (new)
+
+### 9.1 Cập nhật README.md
+
+```markdown
+## Configuration Reference
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MAX_TOTAL_CHARS` | 20000 | Max total chars cho PR code context |
+| `MAX_PATCH_CHARS` | 10000 | Max chars per file patch |
+| `SMALL_PR_THRESHOLD` | 5 | Files count threshold cho SMALL PR |
+| `MEDIUM_PR_THRESHOLD` | 15 | Files count threshold cho MEDIUM PR |
+| `MAX_CONCURRENT_AGENTS` | 4 | Max agents chạy concurrent |
+| `AGENT_TIMEOUT_SECONDS` | 45 | Timeout per agent (seconds) |
+| `MAX_RETRY_ATTEMPTS` | 3 | Số lần retry API calls |
+| `ENABLE_METRICS` | true | Bật/tắt metrics collection |
+| `METRICS_FILE_PATH` | review_metrics.jsonl | Path to metrics log file |
+```
+
+### 9.2 Tạo CONFIGURATION.md
+
+Document chi tiết:
+- Mỗi config variable: type, default, range, effect
+- Examples cho các scenarios khác nhau (small team, enterprise, CI/CD)
+- Troubleshooting guide cho common issues
+
+### 9.3 Tạo EXAMPLES.md
+
+Example output cho:
+- Small PR review output (APPROVE)
+- Large PR review output (REQUEST CHANGES)
+- Review with inline comments
+- Review with security findings
+
+### Kết quả mong đợi
+- Developer dễ dàng config và customize
+- Onboarding nhanh cho team members mới
+- Troubleshooting guide giảm support burden
+
+---
+
 ## 📁 Summary — Files cần thay đổi
 
 | File | Phases | Mô tả thay đổi |
 |------|--------|----------------|
-| `config/settings.py` | 1 | Thêm `MAX_TOTAL_CHARS`, `MAX_PATCH_CHARS`, size thresholds |
-| `github_utils/client.py` | 1, 4, 7 | Dynamic sizing, metadata fetch, inline comments |
+| `tests/` (new) | 0 | Test suite: unit, integration, performance |
+| `config/settings.py` | 1 | Thêm config mới + validation + throttling |
+| `github_utils/client.py` | 1, 4, 7 | Dynamic sizing, metadata fetch, inline comments, retry logic |
 | `tasks/tasks.py` | 2, 3, 5 | Structured output templates, context passing, enhanced Tech Lead task |
 | `agents/agents.py` | 5 | Enhanced Tech Lead backstory |
-| `main.py` | 1, 4, 6, 7, 8 | Metadata, post-processing, inline comments, metrics, dynamic sizing |
+| `main.py` | 1, 4, 6, 7, 8 | Metadata, post-processing, inline comments, metrics, dynamic sizing, throttling |
+| `README.md` | 9 | Update config reference |
+| `docs/CONFIGURATION.md` (new) | 9 | Detailed config documentation |
+| `docs/EXAMPLES.md` (new) | 9 | Example review outputs |
 
 ## 🔄 Thứ tự triển khai khuyến nghị
 
 ```
-1. Phase 2 → Structured Output        (tasks/tasks.py)
-2. Phase 3 → Context Passing           (tasks/tasks.py)
-3. Phase 5 → Enhanced Tech Lead        (agents/agents.py + tasks/tasks.py)
-4. Phase 1 → Dynamic Context           (config/settings.py + client.py)
-5. Phase 4 → PR Metadata               (client.py + main.py)
-6. Phase 6 → Post-Processing           (main.py)
-7. Phase 7 → Inline Comments           (client.py + main.py)
-8. Phase 8 → Quality Metrics           (main.py)
+1. Phase 0 → Testing Framework        (tests/ directory) - Foundation
+2. Phase 2 → Structured Output        (tasks/tasks.py)
+3. Phase 8 (Basic) → Metrics         (main.py) - Measure success
+4. Phase 3 → Context Passing          (tasks/tasks.py)
+5. Phase 5 → Enhanced Tech Lead       (agents/agents.py + tasks/tasks.py)
+6. Phase 1 → Dynamic Context          (config/settings.py + client.py)
+7. Phase 4 → PR Metadata              (client.py + main.py)
+8. Phase 6 → Post-Processing         (main.py)
+9. Phase 7 → Inline Comments          (client.py + main.py)
+10. Phase 8 (Enhanced) → Metrics      (main.py)
+11. Phase 9 → Documentation           (README.md, docs/)
 ```
 
 ## ⚠️ Risks & Considerations
@@ -709,6 +1022,59 @@ print(f"   📋 Issues: {metrics['review']['major_issues']} major, {metrics['rev
 | Inline comments cần đúng line numbers | Fallback to body-only nếu parse fail |
 | Metrics file grows unbounded | Rotate/log rotation; JSONL format dễ process |
 | Dynamic sizing có thể exceed model context | Hard cap ở model's context window |
+| Missing testing leads to bugs | Phase 0 MUST be implemented first |
+| API rate limits cause failures | Retry mechanism with exponential backoff |
+| Large PRs cause timeouts | Performance throttling based on size |
+| Configuration errors in production | Add validation function for settings |
+| Multi-language PRs get inconsistent reviews | Language-specific review strategies |
+
+## 🔧 **Additional Edge Cases to Handle**
+
+### Binary Files
+```python
+def is_binary_file(filename: str, content: str) -> bool:
+    """Detect if file is binary."""
+    binary_extensions = {'.exe', '.dll', '.so', '.png', '.jpg', '.pdf', '.zip'}
+    return any(filename.endswith(ext) for ext in binary_extensions)
+```
+
+### Generated Files
+```python
+def is_generated_file(filename: str) -> bool:
+    """Detect if file is auto-generated."""
+    generated_patterns = ['node_modules/', 'dist/', 'build/', '.env', '*.min.js']
+    return any(pattern in filename for pattern in generated_patterns)
+```
+
+### Empty PR
+```python
+def handle_empty_pr(pr_files: list) -> str:
+    """Handle PR with no changed files."""
+    if not pr_files:
+        return "No code files to review"
+    if all(is_binary_file(f.get('filename', '')) for f in pr_files):
+        return "PR contains only binary files - no code review needed"
+```
+
+### Multi-language PR
+```python
+def get_language_specific_settings(pr_files: list) -> dict:
+    """Get review settings based on primary language."""
+    extensions = {}
+    for f in pr_files:
+        ext = f.get('filename', '').split('.')[-1]
+        extensions[ext] = extensions.get(ext, 0) + 1
+    
+    primary_lang = max(extensions.items(), key=lambda x: x[1])[0]
+    
+    lang_settings = {
+        'python': {'review_style': 'pep8', 'focus_on': 'bugs, security'},
+        'javascript': {'review_style': 'eslint', 'focus_on': 'async, security'},
+        'go': {'review_style': 'golint', 'focus_on': 'concurrency, performance'}
+    }
+    
+    return lang_settings.get(primary_lang, {'review_style': 'general'})
+```
 
 ---
 
@@ -716,8 +1082,25 @@ print(f"   📋 Issues: {metrics['review']['major_issues']} major, {metrics['rev
 
 Sau khi triển khai, đo lường success bằng:
 
+### Core Quality Metrics
 1. **False positive rate** giảm ≥ 50% (so với trước Phase 2)
 2. **Duplicate findings** giảm ≥ 70% (so với trước Phase 3)
 3. **Verdict accuracy** — APPROVE cho clean PR, REQUEST CHANGES cho buggy PR
 4. **Output format consistency** — 100% reviews có summary table + verdict
 5. **Files reviewed ratio** — ≥ 90% source files được review (trước truncation)
+
+### Performance Metrics
+6. **Average review time** — < 5 minutes cho small PR, < 10 minutes cho large PR
+7. **Success rate** — > 95% reviews complete without errors
+8. **API success rate** — > 99% API calls succeed with retry
+9. **Memory usage** — < 4GB per review process
+
+### Developer Experience
+10. **Review clarity score** — developer satisfaction rating (1-5 scale)
+11. **Time to fix** — average time for developers to address issues
+12. **False positive feedback rate** — < 10% of marked issues are false positives
+
+### System Health
+13. **Error rate** — < 1% reviews fail due to system errors
+14. **Timeout rate** — < 5% reviews timeout due to large PRs
+15. **Review completeness** — ≥ 95% of critical files reviewed
