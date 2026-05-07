@@ -90,6 +90,59 @@ class GitHubClient:
         resp.raise_for_status()
         return resp.json()
 
+    def get_pr_head_commit(self, owner: str, repo: str, pr_number: int) -> str:
+        """Get the HEAD commit SHA of a pull request.
+
+        Args:
+            owner: Repository owner.
+            repo: Repository name.
+            pr_number: Pull request number.
+
+        Returns:
+            The SHA string of the PR's head commit.
+        """
+        url = f"{self.BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
+        resp = httpx.get(url, headers=self.headers, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        return data["head"]["sha"]
+
+    def submit_review(
+        self,
+        owner: str,
+        repo: str,
+        pr_number: int,
+        commit_id: str,
+        body: str,
+        event: str,
+        comments: Optional[list] = None,
+    ) -> dict:
+        """Submit a formal GitHub PR review.
+
+        Args:
+            owner: Repository owner.
+            repo: Repository name.
+            pr_number: Pull request number.
+            commit_id: The SHA of the commit to review.
+            body: The review body (markdown).
+            event: Review event — "APPROVE", "REQUEST_CHANGES", or "COMMENT".
+            comments: Optional list of inline comments.
+
+        Returns:
+            The GitHub API response as a dict.
+        """
+        url = f"{self.BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}/reviews"
+        payload = {
+            "commit_id": commit_id,
+            "body": body,
+            "event": event,
+        }
+        if comments:
+            payload["comments"] = comments
+        resp = httpx.post(url, headers=self.headers, json=payload, timeout=30)
+        resp.raise_for_status()
+        return resp.json()
+
     def get_pr_code_for_review(
         self, owner: str, repo: str, pr_number: int, max_chars: int = 12000
     ) -> str:

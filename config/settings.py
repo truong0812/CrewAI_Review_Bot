@@ -13,3 +13,7 @@ LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o-mini")
 
 # GitHub Configuration
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
+
+# Knowledge Base Configuration
+KB_PATH = os.getenv("KB_PATH", "")
+KB_MAX_CHARS = int(os.getenv("KB_MAX_CHARS", "8000"))

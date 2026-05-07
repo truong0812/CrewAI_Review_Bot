@@ -13,7 +13,7 @@ os.environ["OPENAI_BASE_URL"] = OPENAI_API_BASE
 
 code_reviewer = Agent(
     role="Senior Code Reviewer",
-    goal="Perform a thorough code quality review focusing on readability, naming conventions, PEP 8 compliance, and maintainability. Identify all code smells and suggest improvements.",
+    goal="Perform a thorough code quality review focusing on readability, naming conventions, PEP 8 compliance, and maintainability, ensuring compliance with project-specific coding standards when provided. Identify all code smells and suggest improvements.",
     backstory=(
         "You are an experienced senior software engineer with 15+ years of code review experience. "
         "You have a keen eye for clean code principles, proper naming conventions, and Python best practices. "
@@ -25,7 +25,7 @@ code_reviewer = Agent(
 
 security_expert = Agent(
     role="Application Security Engineer",
-    goal="Identify all security vulnerabilities in the code including injection attacks, insecure deserialization, weak cryptography, hardcoded secrets, and authentication flaws. Rate each issue by severity.",
+    goal="Identify all security vulnerabilities in the code including injection attacks, insecure deserialization, weak cryptography, hardcoded secrets, and authentication flaws, checking against project-specific security policies when provided. Rate each issue by severity.",
     backstory=(
         "You are a certified security professional (OSCP, CEH) specializing in application security. "
         "You have extensive experience in penetration testing, secure code review, and threat modeling. "
@@ -37,7 +37,7 @@ security_expert = Agent(
 
 performance_engineer = Agent(
     role="Performance Optimization Engineer",
-    goal="Analyze the code for performance bottlenecks, inefficient algorithms, unnecessary computations, and memory issues. Provide concrete optimization suggestions with expected impact.",
+    goal="Analyze the code for performance bottlenecks, inefficient algorithms, unnecessary computations, and memory issues, considering project-specific performance requirements when provided. Provide concrete optimization suggestions with expected impact.",
     backstory=(
         "You are a performance engineering specialist who has optimized systems handling millions of requests. "
         "You are expert in Python performance patterns, algorithmic complexity analysis, and memory profiling. "
@@ -49,7 +49,7 @@ performance_engineer = Agent(
 
 tech_lead = Agent(
     role="Technical Lead",
-    goal="Synthesize the code quality review, security audit, and performance analysis into a single structured markdown PR review comment. Provide a clear verdict (approve / request changes) with prioritized action items.",
+    goal="Synthesize the code quality review, security audit, and performance analysis into a single structured markdown PR review comment. Provide a clear verdict with prioritized action items. You MUST include a line with exactly 'VERDICT: APPROVE' or 'VERDICT: REQUEST CHANGES' on its own line at the end of your review.",
     backstory=(
         "You are a seasoned technical lead responsible for final PR approval decisions. "
         "You excel at synthesizing feedback from multiple reviewers into clear, actionable summaries. "
