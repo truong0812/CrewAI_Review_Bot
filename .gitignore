@@ -16,3 +16,4 @@ review_output.md
 # IDE
 .vscode/
 .idea/
+.claude/
