@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from crewai import Crew, Process
 
 from agents.agents import all_agents
-from config.settings import GITHUB_TOKEN, KB_PATH, KB_MAX_CHARS
+from config.settings import GITHUB_TOKEN, API_TIMEOUT, KB_PATH, KB_MAX_CHARS
 from github_utils.client import GitHubClient
 from kb_loader import load_knowledge_base
 from tasks.tasks import build_tasks
@@ -35,7 +35,7 @@ def parse_verdict(review_text: str) -> str:
         One of: "APPROVE", "REQUEST_CHANGES", or "COMMENT".
     """
     # Primary: explicit VERDICT marker (matches both "REQUEST CHANGES" and "REQUEST_CHANGES")
-    match = re.search(r"VERDICT:\s*(APPROVE|REQUEST[\s_]+CHANGES)", review_text, re.IGNORECASE)
+    match = re.search(r"VERDICT:\s*(APPROVE|REQUEST[ _]CHANGES)", review_text, re.IGNORECASE)
     if match:
         verdict = match.group(1).upper().replace(" ", "_")
         # Normalize: "REQUEST CHANGES" -> "REQUEST_CHANGES"
@@ -71,7 +71,7 @@ def main():
         sys.exit(1)
 
     # --- Initialize GitHub client ---
-    gh = GitHubClient(GITHUB_TOKEN)
+    gh = GitHubClient(GITHUB_TOKEN, timeout=API_TIMEOUT)
 
     # --- Parse PR URL ---
     try:
@@ -192,7 +192,7 @@ def main():
 
     # (3) Final fallback: save locally
     if not review_submitted:
-        output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "review_output.md")
+        output_path = os.getenv("REVIEW_OUTPUT_PATH", os.path.join(os.getcwd(), "review_output.md"))
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(review_body)
         print(f"💾 Review saved locally to: {output_path}")
