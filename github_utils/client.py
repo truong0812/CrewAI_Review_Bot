@@ -10,9 +10,11 @@ class GitHubClient:
     """Simple GitHub API client using httpx."""
 
     BASE_URL = "https://api.github.com"
+    MAX_PATCH_CHARS = 8000
 
-    def __init__(self, token: str):
+    def __init__(self, token: str, timeout: int = 30):
         self.token = token
+        self.timeout = timeout
         self.headers = {
             "Authorization": f"Bearer {token}",
             "Accept": "application/vnd.github.v3+json",
@@ -54,7 +56,7 @@ class GitHubClient:
                 url,
                 headers=self.headers,
                 params={"per_page": 100, "page": page},
-                timeout=30,
+                timeout=self.timeout,
             )
             resp.raise_for_status()
             data = resp.json()
@@ -71,14 +73,14 @@ class GitHubClient:
         """Fetch the full diff/patch of a PR."""
         url = f"{self.BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
         headers = {**self.headers, "Accept": "application/vnd.github.v3.diff"}
-        resp = httpx.get(url, headers=headers, timeout=30)
+        resp = httpx.get(url, headers=headers, timeout=self.timeout)
         resp.raise_for_status()
         return resp.text
 
     def fetch_pr_title_and_body(self, owner: str, repo: str, pr_number: int) -> dict:
         """Fetch PR title and description."""
         url = f"{self.BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
-        resp = httpx.get(url, headers=self.headers, timeout=30)
+        resp = httpx.get(url, headers=self.headers, timeout=self.timeout)
         resp.raise_for_status()
         data = resp.json()
         return {"title": data.get("title", ""), "body": data.get("body", "")}
@@ -86,7 +88,7 @@ class GitHubClient:
     def post_comment(self, owner: str, repo: str, pr_number: int, body: str) -> dict:
         """Post a comment on a PR (issue comment)."""
         url = f"{self.BASE_URL}/repos/{owner}/{repo}/issues/{pr_number}/comments"
-        resp = httpx.post(url, headers=self.headers, json={"body": body}, timeout=30)
+        resp = httpx.post(url, headers=self.headers, json={"body": body}, timeout=self.timeout)
         resp.raise_for_status()
         return resp.json()
 
@@ -102,9 +104,14 @@ class GitHubClient:
             The SHA string of the PR's head commit.
         """
         url = f"{self.BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
-        resp = httpx.get(url, headers=self.headers, timeout=30)
+        resp = httpx.get(url, headers=self.headers, timeout=self.timeout)
         resp.raise_for_status()
         data = resp.json()
+        if "head" not in data or "sha" not in data.get("head", {}):
+            raise ValueError(
+                f"Unexpected API response: missing 'head.sha' in PR data "
+                f"for {owner}/{repo}#{pr_number}"
+            )
         return data["head"]["sha"]
 
     def submit_review(
@@ -139,12 +146,25 @@ class GitHubClient:
         }
         if comments:
             payload["comments"] = comments
-        resp = httpx.post(url, headers=self.headers, json=payload, timeout=30)
-        resp.raise_for_status()
+        try:
+            resp = httpx.post(
+                url, headers=self.headers, json=payload, timeout=self.timeout
+            )
+            resp.raise_for_status()
+        except httpx.TimeoutException:
+            raise TimeoutError(
+                f"GitHub API request timed out after {self.timeout}s "
+                f"while submitting review for {owner}/{repo}#{pr_number}"
+            )
+        except httpx.HTTPStatusError as e:
+            raise RuntimeError(
+                f"GitHub API returned {e.response.status_code} "
+                f"while submitting review: {e.response.text}"
+            ) from e
         return resp.json()
 
     def get_pr_code_for_review(
-        self, owner: str, repo: str, pr_number: int, max_chars: int = 30000
+        self, owner: str, repo: str, pr_number: int, max_chars: int = 8000
     ) -> str:
         """Fetch PR info and format the code for agent review.
 
@@ -193,7 +213,7 @@ class GitHubClient:
                 continue
 
             # Truncate large diffs per file
-            max_patch_chars = 8000
+            max_patch_chars = self.MAX_PATCH_CHARS
             if len(patch) > max_patch_chars:
                 patch = patch[:max_patch_chars] + "\n... (truncated)"
 
