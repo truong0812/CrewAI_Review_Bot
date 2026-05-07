@@ -132,7 +132,7 @@ def _build_risks(risks: list) -> str:
     items = []
     for r in risks:
         name = r.get("name", "")
-        severity = r.get("severity", "unknown").upper()
+        severity = (r.get("severity") or "unknown").upper()
         file_path = r.get("file_path", "")
         if name:
             label = f"**{name}**"
