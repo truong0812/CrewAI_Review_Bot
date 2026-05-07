@@ -16,4 +16,7 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 
 # Knowledge Base Configuration
 KB_PATH = os.getenv("KB_PATH", "")
-KB_MAX_CHARS = int(os.getenv("KB_MAX_CHARS", "8000"))
+try:
+    KB_MAX_CHARS = int(os.getenv("KB_MAX_CHARS", "8000"))
+except (ValueError, TypeError):
+    KB_MAX_CHARS = 8000

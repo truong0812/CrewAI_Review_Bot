@@ -144,15 +144,35 @@ class GitHubClient:
         return resp.json()
 
     def get_pr_code_for_review(
-        self, owner: str, repo: str, pr_number: int, max_chars: int = 12000
+        self, owner: str, repo: str, pr_number: int, max_chars: int = 30000
     ) -> str:
         """Fetch PR info and format the code for agent review.
 
         Returns a formatted string with PR title, description, and file diffs.
         Content is truncated to max_chars to fit within LLM context limits.
+        Prioritizes source code files (.py, .js, .ts, etc.) over config/log files.
         """
         pr_info = self.fetch_pr_title_and_body(owner, repo, pr_number)
         files = self.fetch_pr_files(owner, repo, pr_number)
+
+        # Sort: source code files first, config/misc files last
+        source_extensions = {
+            ".py", ".js", ".ts", ".jsx", ".tsx", ".java", ".go", ".rs",
+            ".c", ".cpp", ".h", ".rb", ".php", ".cs", ".swift", ".kt",
+            ".scala", ".sh", ".yaml", ".yml", ".toml", ".json", ".sql",
+        }
+        skip_extensions = {".log", ".bat", ".lock", ".png", ".jpg", ".gif", ".svg"}
+
+        def file_priority(f):
+            filename = f.get("filename", "")
+            ext = "." + filename.rsplit(".", 1)[-1] if "." in filename else ""
+            if ext in skip_extensions:
+                return 2  # lowest priority
+            if ext in source_extensions:
+                return 0  # highest priority
+            return 1  # medium priority
+
+        sorted_files = sorted(files, key=file_priority)
 
         sections = []
         sections.append(f"## PR: {pr_info['title']}")
@@ -160,13 +180,20 @@ class GitHubClient:
             sections.append(f"**Description:** {pr_info['body']}")
         sections.append("")
 
-        for f in files:
+        skipped = 0
+        for i, f in enumerate(sorted_files):
             filename = f.get("filename", "unknown")
             status = f.get("status", "unknown")
             patch = f.get("patch", "(binary file or no patch available)")
 
-            # Truncate large diffs to keep within context limit
-            max_patch_chars = 3000
+            # Skip irrelevant files entirely (but only if they have no code changes)
+            ext = "." + filename.rsplit(".", 1)[-1] if "." in filename else ""
+            if ext in skip_extensions and not patch.startswith("diff"):
+                skipped += 1
+                continue
+
+            # Truncate large diffs per file
+            max_patch_chars = 8000
             if len(patch) > max_patch_chars:
                 patch = patch[:max_patch_chars] + "\n... (truncated)"
 
@@ -179,9 +206,14 @@ class GitHubClient:
             # Check if adding this entry would exceed total limit
             current_len = sum(len(s) + 1 for s in sections)
             if current_len + len(entry) > max_chars:
-                sections.append(f"### ... and {len(files) - files.index(f)} more file(s) (truncated)\n")
+                remaining = len(sorted_files) - i - skipped
+                if remaining > 0:
+                    sections.append(f"### ... and {remaining} more file(s) (truncated)\n")
                 break
 
             sections.append(entry)
+
+        if skipped > 0:
+            sections.append(f"\n_(Skipped {skipped} non-source files: logs, images, etc.)_")
 
         return "\n".join(sections)

@@ -34,8 +34,8 @@ def parse_verdict(review_text: str) -> str:
     Returns:
         One of: "APPROVE", "REQUEST_CHANGES", or "COMMENT".
     """
-    # Primary: explicit VERDICT marker
-    match = re.search(r"VERDICT:\s*(APPROVE|REQUEST\s+CHANGES)", review_text, re.IGNORECASE)
+    # Primary: explicit VERDICT marker (matches both "REQUEST CHANGES" and "REQUEST_CHANGES")
+    match = re.search(r"VERDICT:\s*(APPROVE|REQUEST[\s_]+CHANGES)", review_text, re.IGNORECASE)
     if match:
         verdict = match.group(1).upper().replace(" ", "_")
         # Normalize: "REQUEST CHANGES" -> "REQUEST_CHANGES"
@@ -177,7 +177,7 @@ def main():
         print(f"✅ Review submitted ({event}): {review_url}")
         review_submitted = True
     except Exception as e:
-        print(f"⚠️ Formal review failed: {e}")
+        print(f"⚠️ Formal review failed [{type(e).__name__}]: {e}")
         print("   Falling back to issue comment...")
 
     # (2) Fallback: post as issue comment
@@ -188,7 +188,7 @@ def main():
             print(f"✅ Review posted as comment: {comment_url}")
             review_submitted = True
         except Exception as e:
-            print(f"⚠️ Comment post failed: {e}")
+            print(f"⚠️ Comment post failed [{type(e).__name__}]: {e}")
 
     # (3) Final fallback: save locally
     if not review_submitted:
