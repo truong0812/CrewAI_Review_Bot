@@ -206,13 +206,19 @@ Done! ✨
 ## Output Format
 
 Bot submit một **formal GitHub review** trên PR với status **APPROVE** hoặc **REQUEST CHANGES**.
+Review được viết theo style của senior colleague — có lời chào author, khen ngợi, numbered issues, và kết luận tự nhiên.
 
-### Khi không có issues
+### Khi không có issues (LGTM)
 
 ```markdown
-### PR Review Bot — LGTM! ✅
+Hi @dev, I've reviewed the PR.
 
-Code looks good. No issues found across code quality, security, and performance.
+**Assessment:**
+- The component structure is clean and well-organized.
+- Error handling covers edge cases properly.
+- Good use of project conventions.
+
+Looks good to me. Approved! 🦾
 
 VERDICT: APPROVE
 ```
@@ -220,25 +226,53 @@ VERDICT: APPROVE
 ### Khi có issues
 
 ```markdown
-### PR Review Bot — Code Review
+## 📝 Review
 
-**TL;DR:** 1 blocking, 1 suggestion — SQL injection in query builder
+Hi @dev, found 1 issue that should be fixed before merging — string interpolation
+in the query builder is vulnerable to SQL injection. Overall clean work though!
 
----
+### ✅ Good Points
+- Clean separation of concerns in the API layer
+- Proper error handling in the main module
 
-**🔴 Must Fix (1)**
-- `db/query.py:42` — String interpolation in SQL query (Security: Critical)
-  ```python
-  query = f"SELECT * FROM users WHERE id = {user_id}"
-  ```
-  Fix: Use parameterized queries
+### ⚠️ Needs Fixing
+1. **SQL injection in query builder** (`db/query.py:42`)
+   ```python
+   query = f"SELECT * FROM users WHERE id = {user_id}"
+   ```
+   String interpolation in SQL query allows injection attacks.
+   Fix: Use parameterized queries.
 
----
+### 💡 Suggestions (non-blocking)
+- `main.py:10` — Unused import, consider removing to keep the file clean.
 
-**🟡 Suggestions (1)**
-- `main.py:10` — Unused import (Code Quality: Minor)
+### Conclusion
+Fix the SQL injection and we're good to merge. Solid work overall!
 
----
+VERDICT: REQUEST CHANGES
+```
+
+### Khi dùng tiếng Việt (`REVIEW_LANGUAGE=vi`)
+
+Section headers tự động chuyển sang tiếng Việt:
+
+```markdown
+## 📝 Review
+
+Chào @dev, mình thấy PR này có một số điểm làm tốt và cũng có vài điểm cần cải tiến.
+
+### ✅ Điểm tốt
+- Cấu trúc code rõ ràng, dễ theo dõi
+
+### ⚠️ Cần xử lý
+1. **Excessive logging** (`src/api/client.ts:68`)
+   ...
+
+### 💡 Góp ý nhỏ
+- ...
+
+### Kết luận
+Code nhìn chung đã ổn, chỉ cần khắc phục phần log là có thể merge được!
 
 VERDICT: REQUEST CHANGES
 ```
@@ -262,7 +296,7 @@ Nếu không thể submit formal review, bot thử theo thứ tự:
 | `GITHUB_TOKEN` | GitHub Personal Access Token (cần `repo` scope) | — |
 | `API_TIMEOUT` | Timeout cho GitHub API calls (giây) | `30` |
 | `REVIEW_OUTPUT_PATH` | Đường dẫn lưu review local (khi GitHub fail) | `review_output.md` |
-| `REVIEW_LANGUAGE` | Ngôn ngữ review output (`en`, `vi`, `ja`, ...) | `en` |
+| `REVIEW_LANGUAGE` | Ngôn ngữ review output — hỗ trợ `en` (English) và `vi` (Vietnamese) | `en` |
 | `KB_PATH` | Đường dẫn tới thư mục Knowledge Base | `""` (tắt) |
 | `KB_MAX_CHARS` | Giới hạn ký tự cho KB context | `8000` |
 
@@ -286,16 +320,17 @@ LLM_MODEL=llama-3.1-8b-instant
 
 ### Thay đổi ngôn ngữ review
 
+Hiện tại bot hỗ trợ 2 ngôn ngữ:
+
 ```env
-# Tiếng Anh (mặc định)
+# English (mặc định)
 REVIEW_LANGUAGE=en
 
 # Tiếng Việt
 REVIEW_LANGUAGE=vi
-
-# Tiếng Nhật
-REVIEW_LANGUAGE=ja
 ```
+
+> **Lưu ý:** Khi đổi ngôn ngữ, section headers (Good Points / Needs Fixing / Suggestions / Conclusion) sẽ tự động chuyển sang ngôn ngữ tương ứng (Điểm tốt / Cần xử lý / Góp ý nhỏ / Kết luận).
 
 ---
 

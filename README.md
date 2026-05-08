@@ -116,7 +116,7 @@ python main.py https://github.com/owner/repo/pull/123
 - ✅ Simple and runnable — chỉ cần cung cấp PR link
 - ✅ **Formal GitHub Review** — Submit APPROVE / REQUEST CHANGES / COMMENT
 - ✅ **Knowledge Base integration** — Context-aware reviews với KB của dự án
-- ✅ **Multi-language support** — Review output in any language (`REVIEW_LANGUAGE=en/vi/ja/...`)
+- ✅ **Multi-language support** — Review output in English (`en`) hoặc Vietnamese (`vi`)
 - ✅ **Verdict parsing** — Tự động parse verdict để submit đúng review status
 - ✅ **Fallback chain** — submit_review → post_comment → save local
 - ✅ **Smart file prioritization** — Source code files trước, skip .log/.bat/.png
