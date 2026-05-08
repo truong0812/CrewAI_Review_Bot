@@ -31,13 +31,12 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
         )
 
     # Build language instruction with section header translations
-    lang_names = {"en": "English", "vi": "Vietnamese", "ja": "Japanese"}
+    lang_names = {"en": "English", "vi": "Vietnamese"}
     lang_label = lang_names.get(REVIEW_LANGUAGE, REVIEW_LANGUAGE)
 
     lang_headers = {
         "en": {"good": "Good Points", "fix": "Needs Fixing", "suggest": "Suggestions", "conclusion": "Conclusion", "greeting": "Hi"},
         "vi": {"good": "Điểm tốt", "fix": "Cần xử lý", "suggest": "Góp ý nhỏ", "conclusion": "Kết luận", "greeting": "Chào"},
-        "ja": {"good": "良い点", "fix": "修正が必要", "suggest": "提案", "conclusion": "まとめ", "greeting": "こんにちは"},
     }
     headers = lang_headers.get(REVIEW_LANGUAGE, lang_headers["en"])
 
