@@ -85,6 +85,14 @@ class GitHubClient:
         data = resp.json()
         return {"title": data.get("title", ""), "body": data.get("body", "")}
 
+    def fetch_pr_author(self, owner: str, repo: str, pr_number: int) -> str:
+        """Fetch the PR author's GitHub username."""
+        url = f"{self.BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
+        resp = httpx.get(url, headers=self.headers, timeout=self.timeout)
+        resp.raise_for_status()
+        data = resp.json()
+        return data.get("user", {}).get("login", "")
+
     def post_comment(self, owner: str, repo: str, pr_number: int, body: str) -> dict:
         """Post a comment on a PR (issue comment)."""
         url = f"{self.BASE_URL}/repos/{owner}/{repo}/issues/{pr_number}/comments"
