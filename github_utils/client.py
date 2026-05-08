@@ -6,6 +6,8 @@ from typing import Optional
 
 import httpx
 
+import config.settings as cfg
+
 
 class GitHubClient:
     """Simple GitHub API client using httpx."""
@@ -28,12 +30,10 @@ class GitHubClient:
         Retries on transient failures: HTTP 429, 500, 502, 503, 504 and timeouts.
         Does NOT retry on 4xx client errors (except 429).
         """
-        from config.settings import MAX_RETRY_ATTEMPTS, RETRY_DELAY_SECONDS
-
         last_exc = None
         retryable_statuses = {429, 500, 502, 503, 504}
 
-        for attempt in range(MAX_RETRY_ATTEMPTS):
+        for attempt in range(cfg.MAX_RETRY_ATTEMPTS):
             try:
                 resp = httpx.get(url, headers=self.headers, timeout=self.timeout, **kwargs)
                 resp.raise_for_status()
@@ -43,16 +43,16 @@ class GitHubClient:
                 status = e.response.status_code
                 if status not in retryable_statuses:
                     raise
-                if attempt < MAX_RETRY_ATTEMPTS - 1:
-                    delay = RETRY_DELAY_SECONDS * (2 ** attempt)
-                    print(f"   [retry {attempt + 1}/{MAX_RETRY_ATTEMPTS}] "
+                if attempt < cfg.MAX_RETRY_ATTEMPTS - 1:
+                    delay = cfg.RETRY_DELAY_SECONDS * (2 ** attempt)
+                    print(f"   [retry {attempt + 1}/{cfg.MAX_RETRY_ATTEMPTS}] "
                           f"HTTP {status}, waiting {delay}s...")
                     time.sleep(delay)
             except httpx.TimeoutException as e:
                 last_exc = e
-                if attempt < MAX_RETRY_ATTEMPTS - 1:
-                    delay = RETRY_DELAY_SECONDS * (2 ** attempt)
-                    print(f"   [retry {attempt + 1}/{MAX_RETRY_ATTEMPTS}] "
+                if attempt < cfg.MAX_RETRY_ATTEMPTS - 1:
+                    delay = cfg.RETRY_DELAY_SECONDS * (2 ** attempt)
+                    print(f"   [retry {attempt + 1}/{cfg.MAX_RETRY_ATTEMPTS}] "
                           f"Timeout, waiting {delay}s...")
                     time.sleep(delay)
 
@@ -78,11 +78,9 @@ class GitHubClient:
     @staticmethod
     def _calculate_max_chars(file_count: int, base_max: int) -> int:
         """Calculate dynamic context window size based on PR file count."""
-        from config.settings import SMALL_PR_THRESHOLD, MEDIUM_PR_THRESHOLD
-
-        if file_count <= SMALL_PR_THRESHOLD:
+        if file_count <= cfg.SMALL_PR_THRESHOLD:
             return base_max
-        elif file_count <= MEDIUM_PR_THRESHOLD:
+        elif file_count <= cfg.MEDIUM_PR_THRESHOLD:
             return int(base_max * 1.5)
         else:
             return base_max * 2
@@ -90,17 +88,15 @@ class GitHubClient:
     @staticmethod
     def get_throttled_config(pr_size: str) -> dict:
         """Return performance-throttled config preset based on PR size category."""
-        from config.settings import MAX_CONCURRENT_AGENTS, AGENT_TIMEOUT_SECONDS
-
         configs = {
             "SMALL": {
-                "max_agents": MAX_CONCURRENT_AGENTS,
-                "timeout": AGENT_TIMEOUT_SECONDS,
+                "max_agents": cfg.MAX_CONCURRENT_AGENTS,
+                "timeout": cfg.AGENT_TIMEOUT_SECONDS,
                 "priority_only": False,
             },
             "MEDIUM": {
-                "max_agents": max(2, MAX_CONCURRENT_AGENTS - 1),
-                "timeout": AGENT_TIMEOUT_SECONDS + 15,
+                "max_agents": max(2, cfg.MAX_CONCURRENT_AGENTS - 1),
+                "timeout": cfg.AGENT_TIMEOUT_SECONDS + 15,
                 "priority_only": False,
             },
             "LARGE": {

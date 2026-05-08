@@ -101,7 +101,7 @@ def main():
     # --- Fetch PR metadata for dynamic sizing ---
     try:
         pr_metadata = gh.get_pr_metadata(owner, repo, pr_number)
-        file_count_meta = pr_metadata["changed_files"]
+        file_count_meta = pr_metadata.get("changed_files", 0)
     except Exception as e:
         print(f"⚠️ Could not fetch PR metadata: {e}")
         pr_metadata = {}
