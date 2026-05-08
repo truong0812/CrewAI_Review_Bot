@@ -6,12 +6,13 @@ from agents.agents import code_reviewer, security_expert, performance_engineer, 
 from config.settings import REVIEW_LANGUAGE
 
 
-def build_tasks(code: str, knowledge_base: str = "") -> list[Task]:
+def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> list[Task]:
     """Build tasks with the given code/diff content for review.
 
     Args:
         code: The PR code/diff content formatted for review.
         knowledge_base: Optional formatted KB context to inject into tasks.
+        pr_author: Optional GitHub username of the PR author.
 
     Returns:
         List of 4 Task objects to be executed sequentially.
@@ -29,16 +30,31 @@ def build_tasks(code: str, knowledge_base: str = "") -> list[Task]:
             "risk areas, and existing file summaries.\n\n"
         )
 
-    # Build language instruction
+    # Build language instruction with section header translations
     lang_names = {"en": "English", "vi": "Vietnamese", "ja": "Japanese"}
     lang_label = lang_names.get(REVIEW_LANGUAGE, REVIEW_LANGUAGE)
+
+    lang_headers = {
+        "en": {"good": "Good Points", "fix": "Needs Fixing", "suggest": "Suggestions", "conclusion": "Conclusion", "greeting": "Hi"},
+        "vi": {"good": "Điểm tốt", "fix": "Cần xử lý", "suggest": "Góp ý nhỏ", "conclusion": "Kết luận", "greeting": "Chào"},
+        "ja": {"good": "良い点", "fix": "修正が必要", "suggest": "提案", "conclusion": "まとめ", "greeting": "こんにちは"},
+    }
+    headers = lang_headers.get(REVIEW_LANGUAGE, lang_headers["en"])
+
     language_block = ""
     if REVIEW_LANGUAGE != "en":
         language_block = (
             f"\n\n**LANGUAGE:** Write the ENTIRE review in {lang_label}. "
             f"All section headers, explanations, and comments must be in {lang_label}. "
-            f"Keep code snippets and file names as-is (do not translate code)."
+            f"Keep code snippets and file names as-is (do not translate code). "
+            f"Use these section headers: "
+            f"'{headers['good']}', '{headers['fix']}', '{headers['suggest']}', '{headers['conclusion']}'."
         )
+
+    # Build author greeting block
+    author_block = ""
+    if pr_author:
+        author_block = f"\n\n**PR AUTHOR:** The PR author is @{pr_author}. Start your review by greeting them (e.g., 'Hi @{pr_author},' or 'Chào @{pr_author},')."
 
     review_code_quality = Task(
         description=(
@@ -156,39 +172,51 @@ def build_tasks(code: str, knowledge_base: str = "") -> list[Task]:
             "1. Code Quality Review\n"
             "2. Security Audit\n"
             "3. Performance Analysis\n\n"
+            "**TONE:** You are a senior colleague reviewing a teammate's PR. Be friendly, specific, and balanced — always find at least one thing to praise. Write like a human, not a checklist.\n\n"
             "**OUTPUT FORMAT:**\n\n"
-            "If NO valid issues were found, output exactly:\n\n"
-            "### PR Review Bot — LGTM! ✅\n\n"
-            "Code looks good. No issues found across code quality, security, and performance.\n\n"
-            "VERDICT: APPROVE\n\n"
             "Do NOT wrap the output in code fences (no ``` markers). Output raw markdown only.\n\n"
-            "If issues WERE found, follow this structure (raw markdown, no code fences):\n\n"
-            "### PR Review Bot — Code Review\n\n"
-            "**TL;DR:** {{X blocking, Y suggestions}} — {{one-line summary of the most important finding}}\n\n"
-            "---\n\n"
-            "**🔴 Must Fix ({{blocking_count}})**\n"
-            "- `file.py:42` — {{short description}} ({{Category}}: {{Severity}})\n"
-            "  For code snippets use inline code or a fenced block only for the problematic code itself.\n"
-            "  Fix: {{how to fix}}\n\n"
-            "---\n\n"
-            "**🟡 Suggestions ({{non_blocking_count}})**\n"
-            "- `file.py:15` — {{short description}} ({{Category}}: {{Severity}})\n\n"
-            "---\n\n"
+            "## CASE 1 — No valid issues found (LGTM)\n\n"
+            "Write a short, warm review like this example:\n\n"
+            "Hi @{{author}}, I've reviewed the PR.\n\n"
+            "**Assessment:**\n"
+            "- [Specific thing done well, e.g., 'The component structure is clean and well-organized.']\n"
+            "- [Another good point, e.g., 'Error handling covers edge cases properly.']\n"
+            "- [Another good point if relevant.]\n\n"
+            "Looks good to me. Approved! 🦾\n\n"
+            "VERDICT: APPROVE\n\n"
+            "## CASE 2 — Issues found\n\n"
+            "Follow this structure:\n\n"
+            "## 📝 Review\n\n"
+            "Hi @{{author}}, [1-2 natural sentences — overall impression, what caught your eye, balanced tone. Not a dry summary.]\n\n"
+            "### ✅ {good_points_header}\n"
+            "- [At least 1 thing done well — be specific. Examples: clean structure, good naming, proper error handling, follows project conventions.]\n\n"
+            "### ⚠️ {needs_fixing_header}\n"
+            "Use this section ONLY for BLOCKING issues. Number them for easy reference:\n\n"
+            "1. **[Issue title]** (`file.ts:42`)\n"
+            "   [Code snippet showing the problem]\n"
+            "   [Explain why it's a problem and how to fix it]\n\n"
+            "If there are NO blocking issues, omit this entire section.\n\n"
+            "### 💡 {suggestions_header} (non-blocking)\n"
+            "- [Non-blocking suggestions, can be bullet points or numbered.]\n"
+            "- [Include code snippets where helpful.]\n\n"
+            "If there are NO suggestions, omit this entire section.\n\n"
+            "### {conclusion_header}\n"
+            "[A natural closing sentence — like you're telling your teammate the verdict face-to-face.]\n"
+            "Example: 'Code quality is good overall. Fix the SQL injection and we're good to merge.'\n"
+            "Example: 'Just a few minor suggestions — nothing blocking. Nice work!'\n\n"
             "VERDICT: APPROVE  (or VERDICT: REQUEST CHANGES)\n\n"
-            "If there are NO blocking issues, omit the **Must Fix** section entirely.\n"
-            "If there are NO suggestions, omit the **Suggestions** section entirely.\n"
-            "Do NOT include empty sections.\n\n"
             "**IMPORTANT RULES:**\n"
             "- DISCARD any findings that are clearly false positives (e.g., flagging .env.example placeholders as secrets).\n"
             "- DISCARD findings about files not present in the code review.\n"
             "- DISCARD generic/vague advice without specific code references.\n"
             "- MERGE duplicate findings from different reviewers into one entry.\n"
+            "- Do NOT include source labels like 'Code Quality Review', 'Security Audit', 'Performance Analysis' in the final review output. Those are internal task names — the developer does not need to see them.\n"
             "- Only mark issues as BLOCKING if they are genuine bugs, security vulnerabilities, or critical flaws.\n"
             "- Style/naming issues are almost always NON-BLOCKING.\n"
+            "- DIFF SCOPING: Only issues in the ACTUAL CHANGED LINES (the diff/patch) can be BLOCKING. If a finding is about code that already existed in a file before this PR (not modified in this PR), it MUST be classified as a NON-BLOCKING suggestion — even if it's a genuine bug. Only new/modified code can block a PR.\n"
             "- PROOF GATE: Before marking ANY issue as BLOCKING, verify the original finding includes concrete evidence (failing test / exploit scenario / benchmark data). If a finding lacks evidence, downgrade it to NON-BLOCKING regardless of the reviewer's severity rating.\n"
             "- A claim without evidence is a suggestion, not a bug. When in doubt, prefer APPROVE over REQUEST CHANGES.\n"
             "- For bug-fix PRs: If reviewers suggest reverting a fix but cannot prove the fix is wrong with a test case, DISCARD that finding entirely.\n\n"
-            "Be concise. No filler text. No redundant summaries. Speak directly to the developer.\n\n"
             "**VERDICT RULES:**\n"
             "- If only NON-BLOCKING issues (or no issues) → VERDICT: APPROVE\n"
             "- If any BLOCKING issues exist → VERDICT: REQUEST CHANGES\n"
@@ -196,13 +224,23 @@ def build_tasks(code: str, knowledge_base: str = "") -> list[Task]:
             "  - `VERDICT: APPROVE`\n"
             "  - `VERDICT: REQUEST CHANGES`\n"
             "Place this on its own separate line at the very end of your review."
+            "{author_block}"
             "{language_block}"
-        ).format(language_block=language_block),
+        ).format(
+            author_block=author_block,
+            language_block=language_block,
+            good_points_header=headers["good"],
+            needs_fixing_header=headers["fix"],
+            suggestions_header=headers["suggest"],
+            conclusion_header=headers["conclusion"],
+        ),
         expected_output=(
-            "A clean, human-readable markdown PR review comment. "
-            "When no issues found: short LGTM message. "
-            "When issues found: TL;DR summary + categorized bullet list with code snippets. "
-            "No empty sections, no redundant tables, no filler text. "
+            "A friendly, human-readable markdown PR review comment written like a senior colleague. "
+            "Always starts with a greeting to the PR author. "
+            "Always includes a 'Good Points' section with at least 1 specific praise. "
+            "When issues found: numbered blocking issues + non-blocking suggestions. "
+            "When no issues: short warm LGTM with specific compliments. "
+            "Ends with a natural conclusion sentence. "
             "BLOCKING issues MUST have concrete evidence. Issues without proof are NON-BLOCKING. "
             "Must end with exactly 'VERDICT: APPROVE' or 'VERDICT: REQUEST CHANGES'. "
             "Ready to paste into a GitHub PR comment."

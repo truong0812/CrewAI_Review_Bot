@@ -205,45 +205,58 @@ class TestPerformanceAnalysisOutputFormat:
 
 class TestFinalReviewOutputFormat:
     VALID_REVIEW_WITH_ISSUES = """\
-### PR Review Bot — Code Review
+## 📝 Review
 
-**TL;DR:** 1 blocking, 1 suggestion — SQL injection in query builder
+Hi @dev, I've reviewed the PR. Found 1 issue that should be fixed before merging — string interpolation in the query builder is vulnerable to SQL injection. Overall clean work though!
 
----
+### ✅ Good Points
+- Clean separation of concerns in the API layer
+- Proper error handling in the main module
 
-**🔴 Must Fix (1)**
-- `db/query.py:42` — String interpolation in SQL query (Security: Critical)
-  ```python
-  query = f"SELECT * FROM users WHERE id = {user_id}"
-  ```
-  Fix: Use parameterized queries
+### ⚠️ Needs Fixing
+1. **SQL injection in query builder** (`db/query.py:42`)
+   ```python
+   query = f"SELECT * FROM users WHERE id = {user_id}"
+   ```
+   String interpolation in SQL query allows injection attacks. Fix: Use parameterized queries.
 
----
+### 💡 Suggestions (non-blocking)
+- `main.py:10` — Unused import, consider removing to keep the file clean.
 
-**🟡 Suggestions (1)**
-- `main.py:10` — Unused import (Code Quality: Minor)
-
----
+### Conclusion
+Fix the SQL injection and we're good to merge. Solid work overall!
 
 VERDICT: REQUEST CHANGES
 """
 
     VALID_REVIEW_NO_ISSUES = """\
-### PR Review Bot — LGTM! ✅
+Hi @dev, I've reviewed the PR.
 
-Code looks good. No issues found across code quality, security, and performance.
+**Assessment:**
+- The component structure is clean and well-organized.
+- Error handling covers edge cases properly.
+- Good use of project conventions.
+
+Looks good to me. Approved! 🦾
 
 VERDICT: APPROVE
 """
 
-    def test_has_tldr_when_issues(self):
-        assert "TL;DR:" in self.VALID_REVIEW_WITH_ISSUES
+    def test_has_greeting(self):
+        assert "Hi @" in self.VALID_REVIEW_WITH_ISSUES
+        assert "Hi @" in self.VALID_REVIEW_NO_ISSUES
 
-    def test_has_must_fix_section(self):
-        assert "Must Fix" in self.VALID_REVIEW_WITH_ISSUES
+    def test_has_good_points_section(self):
+        assert "Good Points" in self.VALID_REVIEW_WITH_ISSUES
+
+    def test_has_needs_fixing_section(self):
+        assert "Needs Fixing" in self.VALID_REVIEW_WITH_ISSUES
 
     def test_has_suggestions_section(self):
         assert "Suggestions" in self.VALID_REVIEW_WITH_ISSUES
+
+    def test_has_conclusion_section(self):
+        assert "Conclusion" in self.VALID_REVIEW_WITH_ISSUES
 
     def test_has_verdict(self):
         assert has_verdict(self.VALID_REVIEW_WITH_ISSUES)
@@ -256,10 +269,15 @@ VERDICT: APPROVE
     def test_issue_has_inline_location(self):
         assert "`db/query.py:42`" in self.VALID_REVIEW_WITH_ISSUES
 
-    def test_no_issues_format_is_short(self):
-        lines = self.VALID_REVIEW_NO_ISSUES.strip().split("\n")
-        assert len(lines) <= 5
-        assert "LGTM" in self.VALID_REVIEW_NO_ISSUES
+    def test_issues_are_numbered(self):
+        assert "1." in self.VALID_REVIEW_WITH_ISSUES
+
+    def test_no_robotic_formatting(self):
+        assert "TL;DR:" not in self.VALID_REVIEW_WITH_ISSUES
+        assert "Must Fix" not in self.VALID_REVIEW_WITH_ISSUES
+
+    def test_lgtm_has_specific_praise(self):
+        assert "clean" in self.VALID_REVIEW_NO_ISSUES or "well-organized" in self.VALID_REVIEW_NO_ISSUES
 
     def test_approve_verdict(self):
         assert "VERDICT: APPROVE" in self.VALID_REVIEW_NO_ISSUES

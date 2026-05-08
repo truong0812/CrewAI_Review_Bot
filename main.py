@@ -112,8 +112,18 @@ def main():
     print(f"✅ Fetched {file_count} file(s) from PR")
     print()
 
-    # --- Build tasks with fetched code + KB ---
-    tasks = build_tasks(code_content, knowledge_base=kb_content)
+    # --- Fetch PR author ---
+    pr_author = ""
+    try:
+        pr_author = gh.fetch_pr_author(owner, repo, pr_number)
+        if pr_author:
+            print(f"👤 PR author: @{pr_author}")
+    except Exception:
+        pass  # Non-critical — review works without author
+    print()
+
+    # --- Build tasks with fetched code + KB + author ---
+    tasks = build_tasks(code_content, knowledge_base=kb_content, pr_author=pr_author)
 
     # --- Run the crew ---
     print("🚀 Starting multi-agent review...")
