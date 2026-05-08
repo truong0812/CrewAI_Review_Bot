@@ -102,6 +102,9 @@ def main():
     try:
         pr_metadata = gh.get_pr_metadata(owner, repo, pr_number)
         file_count_meta = pr_metadata.get("changed_files", 0)
+        if not isinstance(file_count_meta, int) or file_count_meta < 0:
+            print("⚠️ Unexpected metadata format, using defaults")
+            file_count_meta = 0
     except Exception as e:
         print(f"⚠️ Could not fetch PR metadata: {e}")
         pr_metadata = {}

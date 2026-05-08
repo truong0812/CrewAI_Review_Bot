@@ -100,8 +100,8 @@ class GitHubClient:
                 "priority_only": False,
             },
             "LARGE": {
-                "max_agents": 2,
-                "timeout": 30,
+                "max_agents": max(2, cfg.MAX_CONCURRENT_AGENTS // 2),
+                "timeout": max(15, cfg.AGENT_TIMEOUT_SECONDS // 2),
                 "priority_only": True,
             },
         }
