@@ -113,13 +113,13 @@ def main():
     print()
 
     # --- Fetch PR author ---
-    pr_author = ""
     try:
         pr_author = gh.fetch_pr_author(owner, repo, pr_number)
         if pr_author:
             print(f"👤 PR author: @{pr_author}")
-    except Exception:
-        pass  # Non-critical — review works without author
+    except Exception as e:
+        print(f"⚠️ Could not fetch PR author: {e}")
+        pr_author = ""
     print()
 
     # --- Build tasks with fetched code + KB + author ---
