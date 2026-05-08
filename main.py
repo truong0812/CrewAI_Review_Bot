@@ -16,7 +16,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from crewai import Crew, Process
 
 from agents.agents import all_agents
-from config.settings import GITHUB_TOKEN, API_TIMEOUT, KB_PATH, KB_MAX_CHARS
+from config.settings import (
+    GITHUB_TOKEN, API_TIMEOUT, KB_PATH, KB_MAX_CHARS,
+    MAX_TOTAL_CHARS, SMALL_PR_THRESHOLD, MEDIUM_PR_THRESHOLD,
+    validate_settings,
+)
 from github_utils.client import GitHubClient
 from kb_loader import load_knowledge_base
 from tasks.tasks import build_tasks
@@ -70,6 +74,13 @@ def main():
         print("❌ GITHUB_TOKEN not configured. Please set it in .env file.")
         sys.exit(1)
 
+    # --- Validate configuration ---
+    try:
+        validate_settings()
+    except ValueError as e:
+        print(f"Configuration error: {e}")
+        sys.exit(1)
+
     # --- Initialize GitHub client ---
     gh = GitHubClient(GITHUB_TOKEN, timeout=API_TIMEOUT)
 
@@ -85,6 +96,37 @@ def main():
     print("=" * 60)
     print(f"  📌 PR: {owner}/{repo}#{pr_number}")
     print(f"  🔗 {pr_url}")
+    print()
+
+    # --- Fetch PR metadata for dynamic sizing ---
+    try:
+        pr_metadata = gh.get_pr_metadata(owner, repo, pr_number)
+        file_count_meta = pr_metadata.get("changed_files", 0)
+        if not isinstance(file_count_meta, int) or file_count_meta < 0:
+            print("⚠️ Unexpected metadata format, using defaults")
+            file_count_meta = 0
+    except Exception as e:
+        print(f"⚠️ Could not fetch PR metadata: {e}")
+        pr_metadata = {}
+        file_count_meta = 0
+
+    if file_count_meta <= SMALL_PR_THRESHOLD:
+        pr_size = "SMALL"
+    elif file_count_meta <= MEDIUM_PR_THRESHOLD:
+        pr_size = "MEDIUM"
+    else:
+        pr_size = "LARGE"
+
+    if file_count_meta > 0:
+        max_chars = GitHubClient._calculate_max_chars(file_count_meta, MAX_TOTAL_CHARS)
+    else:
+        max_chars = MAX_TOTAL_CHARS
+
+    throttle_config = GitHubClient.get_throttled_config(pr_size)
+    print(f"  📏 PR size: {pr_size} ({file_count_meta} files, "
+          f"context: {max_chars} chars)")
+    print(f"  ⚙️  Throttle: max_agents={throttle_config['max_agents']}, "
+          f"timeout={throttle_config['timeout']}s")
     print()
 
     # --- Load Knowledge Base ---
@@ -103,7 +145,7 @@ def main():
     # --- Fetch PR code ---
     print("📥 Fetching PR files from GitHub...")
     try:
-        code_content = gh.get_pr_code_for_review(owner, repo, pr_number)
+        code_content = gh.get_pr_code_for_review(owner, repo, pr_number, max_chars=max_chars)
     except Exception as e:
         print(f"❌ Failed to fetch PR: {e}")
         sys.exit(1)
