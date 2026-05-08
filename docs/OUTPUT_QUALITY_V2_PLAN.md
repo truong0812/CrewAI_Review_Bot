@@ -2,8 +2,7 @@
 
 > **Status:** 🔄 Đang triển khai
 > **Created:** 2026-05-07
-> **Updated:** 2026-05-08 (Phase 1 done — dynamic context, retry, metadata)
-> **Based on:** Phân tích toàn bộ codebase hiện tại
+> **Updated:** 2026-05-08 (Phase 2 done — structured output, architecture reviewer agent)
 > **Based on:** Phân tích toàn bộ codebase hiện tại
 
 ---
@@ -303,9 +302,17 @@ def get_throttled_config(self, pr_size: str) -> dict:
 
 ---
 
-## Phase 2: Structured Output Format cho Reviewers
+## Phase 2: Structured Output Format cho Reviewers ✅ DONE
 
-**Mục tiêu:** 3 reviewers output theo format nhất quán → Tech Lead dễ parse và synthesize
+**Mục tiêu:** 4 reviewers output theo format nhất quán + thêm Architecture Reviewer agent đầu pipeline → Tech Lead dễ parse và synthesize
+
+**Changes implemented:**
+- Thêm `architecture_reviewer` agent (`agents/agents.py`) — review SOLID, coupling, cohesion, patterns, dependencies
+- Pipeline mới: **Architecture → Code Quality → Security → Performance → Tech Lead** (5 agents)
+- 4 format constants trong `tasks/tasks.py`: `ARCHITECTURE_FORMAT`, `CODE_QUALITY_FORMAT`, `SECURITY_AUDIT_FORMAT`, `PERFORMANCE_FORMAT`
+- Mỗi reviewer task có OUTPUT FORMAT template appended cuối description
+- Tech Lead task reference 4 reviewers thay vì 3
+- Tests: `TestArchitectureReviewer` + `TestStructuredOutputFormat` trong `test_tasks.py`, `TestArchitectureReviewOutputFormat` trong `test_output_quality.py`
 
 **Files thay đổi:**
 - `tasks/tasks.py`
@@ -410,6 +417,12 @@ End with a **Summary** section showing issue counts.
 - Output nhất quán giữa các lần chạy
 - Tech Lead dễ extract issues → giảm miss rate
 - Dễ post-process (Phase 6)
+
+### Kết quả thực tế ✅
+- 4 reviewers output theo structured markdown (File, Line, Severity, Code, Problem, Fix + Summary)
+- Architecture Reviewer agent mới ở đầu pipeline — review SOLID, coupling, cohesion, patterns
+- 76 tests pass (35 test_tasks + 41 test_output_quality)
+- Pipeline: Architecture → Code Quality → Security → Performance → Tech Lead (5 agents)
 
 ---
 
