@@ -169,6 +169,7 @@ def main():
 
     # --- Run the crew ---
     print("🚀 Starting multi-agent review...")
+    print("   ⚡ 4 reviewers running in parallel, then Tech Lead synthesis")
     if kb_content:
         print("   (with Knowledge Base context)")
     print()

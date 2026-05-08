@@ -209,6 +209,7 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
             "If no significant architectural concerns exist, state that clearly."
         ),
         agent=architecture_reviewer,
+        async_execution=True,
     )
 
     # ── Task 2: Code Quality Review ──
@@ -247,6 +248,7 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
             "Do NOT include issues about files not present in the code."
         ),
         agent=code_reviewer,
+        async_execution=True,
     )
 
     # ── Task 3: Security Audit ──
@@ -286,6 +288,7 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
             "Do NOT include findings about files not present in the code."
         ),
         agent=security_expert,
+        async_execution=True,
     )
 
     # ── Task 4: Performance Analysis ──
@@ -322,6 +325,7 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
             "If no significant issues exist, state that clearly."
         ),
         agent=performance_engineer,
+        async_execution=True,
     )
 
     # ── Task 5: Tech Lead Final Review ──
@@ -410,6 +414,7 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
             "Ready to paste into a GitHub PR comment."
         ),
         agent=tech_lead,
+        context=[architecture_review, review_code_quality, audit_security, analyze_performance],
     )
 
     return [architecture_review, review_code_quality, audit_security, analyze_performance, compile_final_review]

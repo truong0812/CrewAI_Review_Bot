@@ -308,7 +308,7 @@ class GitHubClient:
 
             # Truncate large diffs per file
             max_patch_chars = self.MAX_PATCH_CHARS
-            if len(patch) > max_patch_chars:
+            if len(patch) >= max_patch_chars:
                 patch = patch[:max_patch_chars] + "\n... (truncated)"
 
             entry = (
