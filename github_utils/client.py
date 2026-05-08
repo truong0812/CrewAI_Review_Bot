@@ -306,10 +306,13 @@ class GitHubClient:
                 skipped += 1
                 continue
 
-            # Truncate large diffs per file
+            # Truncate large diffs per file at the last complete line
             max_patch_chars = self.MAX_PATCH_CHARS
             if len(patch) >= max_patch_chars:
-                patch = patch[:max_patch_chars] + "\n... (truncated)"
+                cutoff = patch.rfind("\n", 0, max_patch_chars)
+                if cutoff == -1:
+                    cutoff = max_patch_chars
+                patch = patch[:cutoff] + "\n... (truncated)"
 
             entry = (
                 f"### File: `{filename}` (status: {status})\n"
