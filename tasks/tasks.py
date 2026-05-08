@@ -2,8 +2,122 @@
 
 from crewai import Task
 
-from agents.agents import code_reviewer, security_expert, performance_engineer, tech_lead
+from agents.agents import (
+    architecture_reviewer, code_reviewer, security_expert,
+    performance_engineer, tech_lead,
+)
 from config.settings import REVIEW_LANGUAGE
+
+# ── Structured output format templates for reviewer agents ──────────────
+
+ARCHITECTURE_FORMAT = """\n\n**OUTPUT FORMAT:**
+Follow this exact markdown structure. If you find architectural issues, use this format for EACH issue:
+
+### Issue N: [Short Title]
+- **File:** `path/to/file.py`
+- **Line:** [line number]
+- **Severity:** MAJOR | MINOR
+- **Category:** coupling | cohesion | solid | pattern | dependency | organization
+- **Code:**
+  ```python
+  # code with architectural concern
+  ```
+- **Architectural Concern:** [explain the design problem and its concrete consequence]
+- **Suggested Improvement:**
+  ```python
+  # improved code
+  ```
+
+End with a Summary section:
+### Summary
+- **MAJOR issues:** X
+- **MINOR issues:** X
+- **Files reviewed:** X/X
+
+If NO architectural concerns exist, output:
+### Summary
+- No significant architectural concerns found. Code changes follow existing patterns.
+"""
+
+CODE_QUALITY_FORMAT = """\n\n**OUTPUT FORMAT:**
+Follow this exact markdown structure. If you find issues, use this format for EACH issue:
+
+### Issue N: [Short Title]
+- **File:** `path/to/file.py`
+- **Line:** [line number]
+- **Severity:** MAJOR | MINOR
+- **Category:** bug | style | maintainability | error-handling
+- **Code:**
+  ```python
+  # problematic code snippet
+  ```
+- **Problem:** [1-2 sentences explaining why]
+- **Suggested Fix:**
+  ```python
+  # corrected code
+  ```
+
+End with a Summary section:
+### Summary
+- **MAJOR issues:** X
+- **MINOR issues:** X
+- **Files reviewed:** X/X
+
+If NO issues are found, output:
+### Summary
+- No issues found. Code quality is good.
+"""
+
+SECURITY_AUDIT_FORMAT = """\n\n**OUTPUT FORMAT:**
+Follow this exact markdown structure. If you find vulnerabilities, use this format for EACH finding:
+
+### Finding N: [Short Title]
+- **File:** `path/to/file.py`
+- **Line:** [line number]
+- **Severity:** CRITICAL | HIGH | MEDIUM | LOW
+- **OWASP Category:** [e.g., A01:2021 - Broken Access Control]
+- **Code:**
+  ```python
+  # vulnerable code
+  ```
+- **Vulnerability:** [explanation]
+- **Remediation:**
+  ```python
+  # fixed code
+  ```
+
+End with a Summary section:
+### Summary
+- **CRITICAL:** X | **HIGH:** X | **MEDIUM:** X | **LOW:** X
+
+If NO vulnerabilities are found, output:
+### Summary
+- No security vulnerabilities found.
+"""
+
+PERFORMANCE_FORMAT = """\n\n**OUTPUT FORMAT:**
+Follow this exact markdown structure. If you find performance issues, use this format for EACH issue:
+
+### Issue N: [Short Title]
+- **File:** `path/to/file.py`
+- **Line:** [line number]
+- **Severity:** HIGH | MEDIUM | LOW
+- **Current Complexity:** [e.g., O(n^2)]
+- **Code:**
+  ```python
+  # slow code
+  ```
+- **Problem:** [explain why it is slow]
+- **Optimized Alternative:**
+  ```python
+  # faster code
+  ```
+- **Expected Impact:** [e.g., "50% faster for large inputs"]
+
+End with a Summary section:
+### Summary
+- Issues found: X (or "No significant performance issues found.")
+"""
 
 
 def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> list[Task]:
@@ -15,7 +129,7 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
         pr_author: Optional GitHub username of the PR author.
 
     Returns:
-        List of 4 Task objects to be executed sequentially.
+        List of 5 Task objects to be executed sequentially.
     """
 
     # Build KB context block if available
@@ -55,6 +169,50 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
     if pr_author:
         author_block = f"\n\n**PR AUTHOR:** The PR author is @{pr_author}. Start your review by greeting them (e.g., 'Hi @{pr_author},' or 'Chào @{pr_author},')."
 
+    # ── Task 1: Architecture Review (NEW — first in pipeline) ──
+
+    architecture_review = Task(
+        description=(
+            "Review the following code changes for architectural quality.\n\n"
+            "Focus on:\n"
+            "- Separation of concerns and single responsibility\n"
+            "- Module coupling and cohesion\n"
+            "- SOLID principles compliance\n"
+            "- Design pattern usage (appropriate or missing)\n"
+            "- Dependency management and injection\n"
+            "- Interface design and API contracts\n"
+            "- Code organization and file structure\n"
+            "- Consistency with existing architectural patterns\n\n"
+            "**IMPORTANT RULES:**\n"
+            "- Only review files ACTUALLY provided in the code below.\n"
+            "- Quote the SPECIFIC code that has an architectural concern.\n"
+            "- Do NOT flag issues that are purely style/naming — those are for Code Reviewer.\n"
+            "- Do NOT flag performance issues — those are for Performance Engineer.\n"
+            "- Do NOT flag security vulnerabilities — those are for Security Expert.\n"
+            "- Focus EXCLUSIVELY on architectural and design concerns.\n"
+            "- Classify severity honestly: structural problems that block future development = MAJOR. "
+            "Preference-based suggestions = MINOR.\n"
+            "- PROOF REQUIREMENT: For each issue, explain the CONCRETE CONSEQUENCE — "
+            "what becomes harder to change, what breaks, or what coupling is introduced.\n"
+            "- If the PR is a small change with no architectural implications, say so honestly.\n\n"
+            "{kb_block}"
+            "Code to review:\n{code}\n\n"
+            "{architecture_format}"
+        ).format(code=code, kb_block=kb_block, architecture_format=ARCHITECTURE_FORMAT),
+        expected_output=(
+            "A structured architecture review in markdown following the OUTPUT FORMAT template. "
+            "Each issue MUST include: File (backtick path), Line number, Severity (MAJOR/MINOR), "
+            "Category (coupling/cohesion/solid/pattern/dependency/organization), Code snippet, "
+            "Architectural Concern explanation, Suggested Improvement with code. "
+            "Must end with a Summary section. "
+            "Each MAJOR finding MUST include concrete consequence analysis. "
+            "If no significant architectural concerns exist, state that clearly."
+        ),
+        agent=architecture_reviewer,
+    )
+
+    # ── Task 2: Code Quality Review ──
+
     review_code_quality = Task(
         description=(
             "Review the following code changes for code quality issues.\n\n"
@@ -76,22 +234,22 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
             "- When in doubt about correctness, classify as Minor and note your uncertainty.\n\n"
             "{kb_block}"
             "Code to review:\n{code}\n\n"
-            "Provide a structured report listing each issue with:\n"
-            "- The exact file name and line number\n"
-            "- A code snippet showing the problematic line(s)\n"
-            "- Why it is a problem\n"
-            "- A concrete suggested fix with code"
-        ).format(code=code, kb_block=kb_block),
+            "{code_quality_format}"
+        ).format(code=code, kb_block=kb_block, code_quality_format=CODE_QUALITY_FORMAT),
         expected_output=(
-            "A structured code quality report in markdown. Each issue MUST include: "
-            "file name, line number, the actual code snippet that has the problem, "
-            "severity (minor/major), explanation of why it's a problem, and a concrete fix. "
-            "Each Major/Bug finding MUST include a failing test case or concrete proof. "
+            "A structured code quality report in markdown following the OUTPUT FORMAT template. "
+            "Each issue MUST include: File (backtick path), Line number, Severity (MAJOR/MINOR), "
+            "Category (bug/style/maintainability/error-handling), Code snippet, Problem explanation, "
+            "Suggested Fix with code. "
+            "Must end with a Summary section showing MAJOR and MINOR counts. "
+            "Each Major finding MUST include a failing test case or concrete proof. "
             "Findings without evidence must be classified as Minor. "
             "Do NOT include issues about files not present in the code."
         ),
         agent=code_reviewer,
     )
+
+    # ── Task 3: Security Audit ──
 
     audit_security = Task(
         description=(
@@ -115,19 +273,22 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
             "- Example of invalid proof: 'This pattern is generally considered unsafe' (too vague — does NOT count as proof).\n\n"
             "{kb_block}"
             "Code to audit:\n{code}\n\n"
-            "Rate each finding by severity (Critical / High / Medium / Low) "
-            "and provide a specific remediation suggestion with code example."
-        ).format(code=code, kb_block=kb_block),
+            "{security_audit_format}"
+        ).format(code=code, kb_block=kb_block, security_audit_format=SECURITY_AUDIT_FORMAT),
         expected_output=(
-            "A security audit report in markdown. Each vulnerability MUST include: "
-            "severity rating, OWASP category, the SPECIFIC code line(s) affected, "
-            "why it's a vulnerability, and concrete remediation steps. "
+            "A security audit report in markdown following the OUTPUT FORMAT template. "
+            "Each vulnerability MUST include: File (backtick path), Line number, "
+            "Severity (CRITICAL/HIGH/MEDIUM/LOW), OWASP Category, Code snippet, "
+            "Vulnerability explanation, Remediation with code. "
+            "Must end with a Summary section showing counts per severity level. "
             "Each Critical/High finding MUST include a concrete exploit scenario or failing test. "
             "Findings without proof must be rated Low/Informational. "
             "Do NOT include findings about files not present in the code."
         ),
         agent=security_expert,
     )
+
+    # ── Task 4: Performance Analysis ──
 
     analyze_performance = Task(
         description=(
@@ -148,16 +309,14 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
             "- Theoretical concerns without measurable impact MUST be classified as Non-blocking suggestions.\n\n"
             "{kb_block}"
             "Code to analyze:\n{code}\n\n"
-            "For each issue, provide:\n"
-            "- The exact code snippet with the problem\n"
-            "- Time/space complexity analysis\n"
-            "- A concrete optimized alternative with code\n"
-            "- Estimated impact of the optimization"
-        ).format(code=code, kb_block=kb_block),
+            "{performance_format}"
+        ).format(code=code, kb_block=kb_block, performance_format=PERFORMANCE_FORMAT),
         expected_output=(
-            "A performance analysis report in markdown. Each issue MUST include: "
-            "file name, the actual code snippet, complexity analysis (current vs proposed), "
-            "concrete optimized code alternative, and estimated impact. "
+            "A performance analysis report in markdown following the OUTPUT FORMAT template. "
+            "Each issue MUST include: File (backtick path), Line number, Severity (HIGH/MEDIUM/LOW), "
+            "Current Complexity, Code snippet, Problem explanation, "
+            "Optimized Alternative with code, Expected Impact. "
+            "Must end with a Summary section. "
             "Each finding MUST include measurable evidence (benchmark data or complexity analysis "
             "with real-world impact). Theoretical concerns must be clearly separated. "
             "If no significant issues exist, state that clearly."
@@ -165,12 +324,15 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
         agent=performance_engineer,
     )
 
+    # ── Task 5: Tech Lead Final Review ──
+
     compile_final_review = Task(
         description=(
             "You are the Tech Lead. Compile the final PR review by synthesizing the findings from:\n"
-            "1. Code Quality Review\n"
-            "2. Security Audit\n"
-            "3. Performance Analysis\n\n"
+            "1. Architecture Review\n"
+            "2. Code Quality Review\n"
+            "3. Security Audit\n"
+            "4. Performance Analysis\n\n"
             "**TONE:** You are a senior colleague reviewing a teammate's PR. Be friendly, specific, and balanced — always find at least one thing to praise. Write like a human, not a checklist.\n\n"
             "**OUTPUT FORMAT:**\n\n"
             "Do NOT wrap the output in code fences (no ``` markers). Output raw markdown only.\n\n"
@@ -209,7 +371,7 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
             "- DISCARD findings about files not present in the code review.\n"
             "- DISCARD generic/vague advice without specific code references.\n"
             "- MERGE duplicate findings from different reviewers into one entry.\n"
-            "- Do NOT include source labels like 'Code Quality Review', 'Security Audit', 'Performance Analysis' in the final review output. Those are internal task names — the developer does not need to see them.\n"
+            "- Do NOT include source labels like 'Architecture Review', 'Code Quality Review', 'Security Audit', 'Performance Analysis' in the final review output. Those are internal task names — the developer does not need to see them.\n"
             "- Only mark issues as BLOCKING if they are genuine bugs, security vulnerabilities, or critical flaws.\n"
             "- Style/naming issues are almost always NON-BLOCKING.\n"
             "- DIFF SCOPING: Only issues in the ACTUAL CHANGED LINES (the diff/patch) can be BLOCKING. If a finding is about code that already existed in a file before this PR (not modified in this PR), it MUST be classified as a NON-BLOCKING suggestion — even if it's a genuine bug. Only new/modified code can block a PR.\n"
@@ -247,4 +409,4 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
         agent=tech_lead,
     )
 
-    return [review_code_quality, audit_security, analyze_performance, compile_final_review]
+    return [architecture_review, review_code_quality, audit_security, analyze_performance, compile_final_review]

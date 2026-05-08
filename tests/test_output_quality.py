@@ -45,6 +45,74 @@ def has_verdict(text: str) -> bool:
 
 
 # ============================================================
+# Architecture Review Format
+# ============================================================
+
+
+class TestArchitectureReviewOutputFormat:
+    """Validate expected structure of Architecture Review output."""
+
+    VALID_REVIEW = """\
+## Architecture Review
+
+### Issue 1: Tight Coupling Between Modules
+- **File:** `services/user_service.py`
+- **Line:** 45
+- **Severity:** MAJOR
+- **Category:** coupling
+- **Code:**
+  ```python
+  from database.mysql_connection import MySQLConnection
+  db = MySQLConnection()
+  ```
+- **Architectural Concern:** Direct instantiation of a specific database implementation couples the service layer to MySQL, making it impossible to swap databases without modifying every service file.
+- **Suggested Improvement:**
+  ```python
+  from database.connection import DatabaseConnection
+  db = DatabaseConnection.create()
+  ```
+
+### Summary
+- **MAJOR issues:** 1
+- **MINOR issues:** 0
+- **Files reviewed:** 4/4
+"""
+
+    def test_has_file_path(self):
+        assert has_file_path_with_backticks(self.VALID_REVIEW)
+
+    def test_has_severity(self):
+        assert has_severity_level(self.VALID_REVIEW)
+
+    def test_has_code_snippet(self):
+        assert has_code_snippet(self.VALID_REVIEW)
+
+    def test_has_line_number(self):
+        assert has_line_number(self.VALID_REVIEW)
+
+    def test_has_summary(self):
+        assert has_summary_section(self.VALID_REVIEW)
+
+    def test_issue_structure(self):
+        assert "### Issue" in self.VALID_REVIEW
+        assert "**File:**" in self.VALID_REVIEW
+        assert "**Architectural Concern:**" in self.VALID_REVIEW
+        assert "**Suggested Improvement:**" in self.VALID_REVIEW
+
+    def test_has_category(self):
+        assert "**Category:**" in self.VALID_REVIEW
+        assert "coupling" in self.VALID_REVIEW
+
+    def test_no_issues_statement(self):
+        no_issues = (
+            "## Architecture Review\n\n"
+            "### Summary\n"
+            "- No significant architectural concerns found. Code changes follow existing patterns.\n"
+        )
+        assert "No significant architectural concerns" in no_issues
+
+
+# ============================================================
 # Code Quality Review Format
 # ============================================================
 

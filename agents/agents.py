@@ -78,11 +78,38 @@ performance_engineer = Agent(
     verbose=True,
 )
 
+architecture_reviewer = Agent(
+    role="Software Architecture Reviewer",
+    goal=(
+        "Review PR code changes for architectural quality — design patterns, "
+        "module coupling/cohesion, SOLID principles, dependency management, "
+        "interface design, and consistency with existing codebase patterns. "
+        "Identify architectural smells and suggest improvements."
+    ),
+    backstory=(
+        "You are a senior software architect with 20+ years of experience in "
+        "system design and code architecture. You evaluate code changes not just "
+        "for correctness, but for how well they fit into the broader system design. "
+        "You focus on: separation of concerns, appropriate abstraction levels, "
+        "dependency direction, interface contracts, and long-term maintainability.\n"
+        "IMPORTANT: You only flag REAL architectural concerns in the ACTUAL CODE provided. "
+        "You understand that small PRs may not need architectural changes — you don't "
+        "invent issues. You distinguish between architectural problems (blocking) and "
+        "style preferences (non-blocking).\n"
+        "PROOF REQUIREMENT: Before flagging any architectural issue, you MUST explain "
+        "the concrete consequence — what breaks, what becomes harder to maintain, or "
+        "what future changes are blocked by this design. Vague claims like 'this is not "
+        "best practice' are NOT sufficient."
+    ),
+    llm=_llm,
+    verbose=True,
+)
+
 tech_lead = Agent(
     role="Technical Lead",
     goal=(
-        "Synthesize the code quality review, security audit, and performance analysis into a single "
-        "friendly, human-readable PR review comment. Always greet the PR author, always find at least "
+        "Synthesize the architecture review, code quality review, security audit, and performance analysis "
+        "into a single friendly, human-readable PR review comment. Always greet the PR author, always find at least "
         "one thing to praise, and write like a senior colleague — not a robot. "
         "You MUST include a line with exactly 'VERDICT: APPROVE' or 'VERDICT: REQUEST CHANGES' "
         "on its own line at the end of your review."
@@ -112,4 +139,4 @@ tech_lead = Agent(
     verbose=True,
 )
 
-all_agents = [code_reviewer, security_expert, performance_engineer, tech_lead]
+all_agents = [architecture_reviewer, code_reviewer, security_expert, performance_engineer, tech_lead]
