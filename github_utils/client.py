@@ -1,6 +1,7 @@
 """GitHub API client for fetching PR files and posting review comments."""
 
 import re
+import time
 from typing import Optional
 
 import httpx
@@ -10,7 +11,7 @@ class GitHubClient:
     """Simple GitHub API client using httpx."""
 
     BASE_URL = "https://api.github.com"
-    MAX_PATCH_CHARS = 8000
+    MAX_PATCH_CHARS = 10000
 
     def __init__(self, token: str, timeout: int = 30):
         self.token = token
@@ -20,6 +21,95 @@ class GitHubClient:
             "Accept": "application/vnd.github.v3+json",
             "X-GitHub-Api-Version": "2022-11-28",
         }
+
+    def _get_with_retry(self, url: str, **kwargs) -> httpx.Response:
+        """GET request with exponential backoff retry.
+
+        Retries on transient failures: HTTP 429, 500, 502, 503, 504 and timeouts.
+        Does NOT retry on 4xx client errors (except 429).
+        """
+        from config.settings import MAX_RETRY_ATTEMPTS, RETRY_DELAY_SECONDS
+
+        last_exc = None
+        retryable_statuses = {429, 500, 502, 503, 504}
+
+        for attempt in range(MAX_RETRY_ATTEMPTS):
+            try:
+                resp = httpx.get(url, headers=self.headers, timeout=self.timeout, **kwargs)
+                resp.raise_for_status()
+                return resp
+            except httpx.HTTPStatusError as e:
+                last_exc = e
+                status = e.response.status_code
+                if status not in retryable_statuses:
+                    raise
+                if attempt < MAX_RETRY_ATTEMPTS - 1:
+                    delay = RETRY_DELAY_SECONDS * (2 ** attempt)
+                    print(f"   [retry {attempt + 1}/{MAX_RETRY_ATTEMPTS}] "
+                          f"HTTP {status}, waiting {delay}s...")
+                    time.sleep(delay)
+            except httpx.TimeoutException as e:
+                last_exc = e
+                if attempt < MAX_RETRY_ATTEMPTS - 1:
+                    delay = RETRY_DELAY_SECONDS * (2 ** attempt)
+                    print(f"   [retry {attempt + 1}/{MAX_RETRY_ATTEMPTS}] "
+                          f"Timeout, waiting {delay}s...")
+                    time.sleep(delay)
+
+        raise last_exc
+
+    def get_pr_metadata(self, owner: str, repo: str, pr_number: int) -> dict:
+        """Fetch PR metadata for context-aware review sizing.
+
+        Returns:
+            dict with keys: changed_files, additions, deletions, title, body.
+        """
+        url = f"{self.BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
+        resp = self._get_with_retry(url)
+        data = resp.json()
+        return {
+            "changed_files": data.get("changed_files", 0),
+            "additions": data.get("additions", 0),
+            "deletions": data.get("deletions", 0),
+            "title": data.get("title", ""),
+            "body": data.get("body", ""),
+        }
+
+    @staticmethod
+    def _calculate_max_chars(file_count: int, base_max: int) -> int:
+        """Calculate dynamic context window size based on PR file count."""
+        from config.settings import SMALL_PR_THRESHOLD, MEDIUM_PR_THRESHOLD
+
+        if file_count <= SMALL_PR_THRESHOLD:
+            return base_max
+        elif file_count <= MEDIUM_PR_THRESHOLD:
+            return int(base_max * 1.5)
+        else:
+            return base_max * 2
+
+    @staticmethod
+    def get_throttled_config(pr_size: str) -> dict:
+        """Return performance-throttled config preset based on PR size category."""
+        from config.settings import MAX_CONCURRENT_AGENTS, AGENT_TIMEOUT_SECONDS
+
+        configs = {
+            "SMALL": {
+                "max_agents": MAX_CONCURRENT_AGENTS,
+                "timeout": AGENT_TIMEOUT_SECONDS,
+                "priority_only": False,
+            },
+            "MEDIUM": {
+                "max_agents": max(2, MAX_CONCURRENT_AGENTS - 1),
+                "timeout": AGENT_TIMEOUT_SECONDS + 15,
+                "priority_only": False,
+            },
+            "LARGE": {
+                "max_agents": 2,
+                "timeout": 30,
+                "priority_only": True,
+            },
+        }
+        return configs.get(pr_size, configs["SMALL"])
 
     @staticmethod
     def parse_pr_url(url: str) -> tuple[str, str, int]:
@@ -172,7 +262,7 @@ class GitHubClient:
         return resp.json()
 
     def get_pr_code_for_review(
-        self, owner: str, repo: str, pr_number: int, max_chars: int = 8000
+        self, owner: str, repo: str, pr_number: int, max_chars: int = 20000
     ) -> str:
         """Fetch PR info and format the code for agent review.
 
