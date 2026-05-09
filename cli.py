@@ -264,12 +264,12 @@ def review(pr_url, kb_path, language, output, dry_run, verbose):
 @click.option("--show", "show", is_flag=True, default=True, help="Display current config")
 def config_cmd(set_pairs, show):
     """Check, display, or update configuration settings."""
-    from config.settings import get_settings_dict, set_env_value, _mask_value
+    from config.settings import get_settings_dict
 
     if set_pairs:
         for key, value in set_pairs:
             try:
-                set_env_value(key, value)
+                _set_env_value(key, value)
                 click.echo(f"  Set {key} = {_mask_value(key, value)}")
             except ValueError as e:
                 click.echo(f"  Error: {e}")
@@ -359,3 +359,38 @@ def _write_env_value(env_path, key: str, value: str):
             lines.append("")
         lines.append(f"{key}={value}")
     env_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+# ── .env file I/O (used by config and init commands) ────────────────────
+
+_SENSITIVE_KEYS = {"OPENAI_API_KEY", "GITHUB_TOKEN"}
+
+_VALID_ENV_KEYS = {
+    "OPENAI_API_KEY", "OPENAI_API_BASE", "LLM_MODEL",
+    "GITHUB_TOKEN", "API_TIMEOUT", "REVIEW_OUTPUT_PATH",
+    "REVIEW_LANGUAGE", "MAX_TOTAL_CHARS", "MAX_PATCH_CHARS",
+    "SMALL_PR_THRESHOLD", "MEDIUM_PR_THRESHOLD",
+    "MAX_CONCURRENT_AGENTS", "AGENT_TIMEOUT_SECONDS",
+    "MAX_RETRY_ATTEMPTS", "RETRY_DELAY_SECONDS",
+    "KB_PATH", "KB_MAX_CHARS",
+}
+
+
+def _mask_value(key: str, value: str) -> str:
+    if key in _SENSITIVE_KEYS and value and "your-" not in value and len(value) > 8:
+        return f"{value[:4]}...{value[-4:]}"
+    return str(value)
+
+
+def _set_env_value(key: str, value: str) -> None:
+    """Write a key=value pair into the .env file in the current directory."""
+    from pathlib import Path
+
+    if key not in _VALID_ENV_KEYS:
+        raise ValueError(f"Unknown setting: {key}")
+
+    env_path = Path(".env")
+    if env_path.exists():
+        _write_env_value(env_path, key, value)
+    else:
+        env_path.write_text(f"{key}={value}\n", encoding="utf-8")
