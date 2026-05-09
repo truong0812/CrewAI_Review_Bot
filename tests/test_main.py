@@ -42,6 +42,14 @@ class TestParseVerdict:
     def test_fallback_request_changes_underscore_keyword(self):
         assert parse_verdict("request_changes needed") == "REQUEST_CHANGES"
 
+    def test_truncated_vietnamese_blocking_section(self):
+        text = "### Cần xử lý\n1. **Bug thật sự** (`main.py:10`)\n"
+        assert parse_verdict(text) == "REQUEST_CHANGES"
+
+    def test_truncated_unaccented_vietnamese_blocking_section(self):
+        text = "### Can xu ly\n1. **Bug thật sự** (`main.py:10`)\n"
+        assert parse_verdict(text) == "REQUEST_CHANGES"
+
     # --- Priority: request_changes over approve ---
 
     def test_request_changes_takes_priority_in_fallback(self):
