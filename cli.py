@@ -20,10 +20,21 @@ def parse_verdict(review_text: str) -> str:
         return "APPROVE"
 
     text_lower = review_text.lower()
+
+    # Keyword fallback
     if "request changes" in text_lower or "request_changes" in text_lower:
         return "REQUEST_CHANGES"
     if "approve" in text_lower:
         return "APPROVE"
+
+    # Truncated verdict — LLM ran out of tokens before finishing.
+    # Infer from review content: if blocking issues section has numbered items → REQUEST_CHANGES
+    has_blocking = bool(re.search(
+        r"(?:needs fixing|cần xử lý|needs_fixing)\s*\n.*\d+\.\s+\*\*",
+        text_lower, re.IGNORECASE | re.DOTALL,
+    ))
+    if has_blocking:
+        return "REQUEST_CHANGES"
 
     return "COMMENT"
 
