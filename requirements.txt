@@ -1,3 +1,5 @@
 crewai
 langchain-openai
 python-dotenv
+click>=8.1
+httpx

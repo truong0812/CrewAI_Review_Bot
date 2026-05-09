@@ -4,7 +4,7 @@ import os
 
 from crewai import Agent, LLM
 
-from config.settings import LLM_MODEL, OPENAI_API_KEY, OPENAI_API_BASE
+import config.settings as settings
 
 # Build LLM instance with explicit base_url for provider compatibility.
 # Workaround: initialize with 'openai/gpt-4' (a recognized model) so CrewAI
@@ -12,10 +12,10 @@ from config.settings import LLM_MODEL, OPENAI_API_KEY, OPENAI_API_BASE
 # This bypasses CrewAI's model name parser which can't handle 'meta/llama-...' format.
 _llm = LLM(
     model="openai/gpt-4",
-    base_url=OPENAI_API_BASE,
-    api_key=OPENAI_API_KEY,
+    base_url=settings.OPENAI_API_BASE,
+    api_key=settings.OPENAI_API_KEY,
 )
-_llm.model = LLM_MODEL  # Override with actual NVIDIA model name
+_llm.model = settings.LLM_MODEL  # Override with actual NVIDIA model name
 
 code_reviewer = Agent(
     role="Senior Code Reviewer",

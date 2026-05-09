@@ -1,6 +1,6 @@
 # Usage Guide — PR Review Bot
 
-Hướng dẫn cài đặt, cấu hình và sử dụng PR Review Bot.
+Hướng dẫn cài đặt, cấu hình và sử dụng PR Review Bot CLI.
 
 ---
 
@@ -39,167 +39,132 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Cài đặt dependencies
+### 3. Cài đặt package
 
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
-Hoặc dùng script Windows:
-```cmd
-install.bat
-```
+Lệnh này cài tất cả dependencies và đăng ký CLI command `pr-review`.
 
 > ⏳ Quá trình cài có thể mất 2-5 phút do crewai có nhiều dependencies.
 
 ---
 
-## Cấu hình
+## Thiết lập lần đầu
 
-### 4. Tạo file `.env`
+### Dùng `pr-review init` (interactive)
+
+```bash
+pr-review init
+```
+
+CLI sẽ tạo file `.env` từ template và hỏi các giá trị cần thiết:
+
+```
+Configure your settings (press Enter to keep default):
+
+  OPENAI_API_KEY:
+  OPENAI_API_BASE [https://api.openai.com/v1]:
+  LLM_MODEL [gpt-4o-mini]:
+  GITHUB_TOKEN:
+  REVIEW_LANGUAGE [en]:
+```
+
+### Hoặc thủ công
 
 ```bash
 cp .env.example .env
+# Sau đó chỉnh sửa file .env với API key và token của bạn
 ```
-
-### 5. Cấu hình LLM API Key
-
-1. Truy cập provider API (OpenAI, NVIDIA NIM, Groq, v.v.)
-2. Tạo API key
-3. Copy key và dán vào file `.env`:
-
-```env
-OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxx
-```
-
-**Nếu dùng provider khác** (NVIDIA NIM, Groq, OpenRouter, v.v.), thay `OPENAI_API_BASE`:
-
-```env
-# NVIDIA NIM:
-OPENAI_API_BASE=https://integrate.api.nvidia.com/v1
-LLM_MODEL=meta/llama-3.3-70b-instruct
-
-# OpenRouter:
-OPENAI_API_BASE=https://openrouter.ai/api/v1
-
-# Groq:
-OPENAI_API_BASE=https://api.groq.com/openai/v1
-
-# Local LM Studio:
-OPENAI_API_BASE=http://localhost:1234/v1
-```
-
-### 6. Cấu hình GitHub Token
-
-1. Truy cập [github.com/settings/tokens](https://github.com/settings/tokens)
-2. Nhấn **"Generate new token (classic)"** hoặc **"Fine-grained token"**
-3. Chọn quyền (scopes):
-   - ✅ `repo` — Đọc PR và submit review (full repository access)
-   - Hoặc với fine-grained token: **Read & Write** cho "Pull requests" và "Issues"
-4. Copy token và dán vào file `.env`:
-
-```env
-GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
-### 7. Cấu hình Knowledge Base (tùy chọn)
-
-Nếu bạn có Knowledge Base JSON cho dự án, đặt nó vào thư mục `knowledge_base/` và cấu hình:
-
-```env
-KB_PATH=knowledge_base/CrewAI_Review_Bot
-KB_MAX_CHARS=8000
-```
-
-> KB sẽ cung cấp context về coding conventions, risk areas, file summaries và dependencies cho agents.
-
-### File `.env` hoàn chỉnh
-
-```env
-# LLM Configuration
-OPENAI_API_KEY=sk-your-api-key-here
-OPENAI_API_BASE=https://api.openai.com/v1
-LLM_MODEL=gpt-4o-mini
-
-# GitHub Configuration
-GITHUB_TOKEN=ghp-your-github-token-here
-API_TIMEOUT=30
-REVIEW_OUTPUT_PATH=
-
-# Review Configuration
-REVIEW_LANGUAGE=en
-
-# Knowledge Base Configuration
-KB_PATH=knowledge_base/CrewAI_Review_Bot
-KB_MAX_CHARS=8000
-```
-
-> **Lưu ý khi dùng provider khác OpenAI:** Project khởi tạo LLM với `base_url=OPENAI_API_BASE` trong `agents/agents.py`, nên hỗ trợ mọi OpenAI-compatible provider.
 
 ---
 
 ## Sử dụng
 
-### Chạy từ command line
+### `pr-review review` — Review PR
 
 ```bash
-# Kích hoạt venv trước (nếu chưa)
-.venv\Scripts\activate
+# Cơ bản — review một PR
+pr-review review https://github.com/owner/repo/pull/123
 
-# Chạy review PR (không KB)
-python main.py https://github.com/owner/repo/pull/123
+# Với Knowledge Base
+pr-review review https://github.com/owner/repo/pull/123 -k knowledge_base/CrewAI_Review_Bot
 
-# Chạy review PR với Knowledge Base
-python main.py https://github.com/owner/repo/pull/123 knowledge_base/CrewAI_Review_Bot
+# Chạy review tiếng Việt
+pr-review review https://github.com/owner/repo/pull/123 -l vi
+
+# Dry run — không submit lên GitHub, chỉ lưu local
+pr-review review https://github.com/owner/repo/pull/123 --dry-run -o review.md
+
+# Verbose — xem chi tiết agent logs
+pr-review review https://github.com/owner/repo/pull/123 -v
+```
+
+#### Tất cả options
+
+| Option | Short | Mô tả |
+|---|---|---|
+| `--kb-path PATH` | `-k` | Đường dẫn Knowledge Base (override .env) |
+| `--language LANG` | `-l` | Ngôn ngữ review: `en` hoặc `vi` (override .env) |
+| `--output PATH` | `-o` | File lưu review local (khi dry-run hoặc fallback) |
+| `--dry-run` | — | Chạy review nhưng không submit lên GitHub |
+| `--verbose` | `-v` | Hiển thị chi tiết agent logs |
+
+### `pr-review config` — Xem / thay đổi cấu hình
+
+```bash
+# Hiển thị tất cả settings hiện tại
+pr-review config
+
+# Thay đổi một giá trị (ghi vào .env)
+pr-review config --set LLM_MODEL gpt-4o
+pr-review config --set REVIEW_LANGUAGE vi
+pr-review config --set GITHUB_TOKEN ghp_newtoken123
+```
+
+Output của `pr-review config`:
+
+```
+Config (from /path/to/.env):
+--------------------------------------------------
+  OPENAI_API_KEY                 nvap...c1sp
+  OPENAI_API_BASE                https://integrate.api.nvidia.com/v1
+  LLM_MODEL                      qwen/qwen3-coder-480b-a35b-instruct
+  GITHUB_TOKEN                   ghp_...t6Yf
+  API_TIMEOUT                    30
+  REVIEW_LANGUAGE                vi
+  ...
+--------------------------------------------------
+```
+
+> API keys và tokens tự động được mask trong output.
+
+### `pr-review init` — Khởi tạo cấu hình
+
+```bash
+# Tạo .env lần đầu
+pr-review init
+
+# Ghi đè .env cũ (backup tự động)
+pr-review init --force
 ```
 
 ### Chạy bằng batch script (Windows)
 
 ```cmd
-run.bat https://github.com/owner/repo/pull/123
+run.bat review https://github.com/owner/repo/pull/123
 ```
 
-### Ví dụ thực tế
+### Backward compatibility
+
+Cách cũ vẫn hoạt động:
 
 ```bash
-# Review PR số 42 trong repo của bạn (không KB)
-python main.py https://github.com/myusername/myproject/pull/42
-
-# Review PR với Knowledge Base context
-python main.py https://github.com/myusername/myproject/pull/42 knowledge_base/CrewAI_Review_Bot
-
-# Review PR trong organization
-python main.py https://github.com/myorg/frontend-app/pull/158
+python main.py https://github.com/owner/repo/pull/123
 ```
 
-### Kết quả trên terminal
-
-```
-============================================================
-  🤖 PR Review Bot — Multi-Agent Code Review
-============================================================
-  📌 PR: myusername/myproject#42
-  🔗 https://github.com/myusername/myproject/pull/42
-
-📚 Loading Knowledge Base from: knowledge_base/CrewAI_Review_Bot
-✅ KB loaded (4521 chars)
-
-📥 Fetching PR files from GitHub...
-✅ Fetched 5 file(s) from PR
-
-🚀 Starting multi-agent review...
-   (with Knowledge Base context)
-
-[Agent logs here...]
-
-⚖️  Parsed verdict: REQUEST_CHANGES
-
-📤 Submitting review to GitHub PR...
-   HEAD commit: abc123def456...
-✅ Review submitted (REQUEST_CHANGES): https://github.com/...
-
-Done! ✨
-```
+Sẽ tự động chuyển sang `pr-review review`.
 
 ---
 
@@ -218,7 +183,7 @@ Hi @dev, I've reviewed the PR.
 - Error handling covers edge cases properly.
 - Good use of project conventions.
 
-Looks good to me. Approved! 🦾
+Looks good to me. Approved!
 
 VERDICT: APPROVE
 ```
@@ -226,16 +191,16 @@ VERDICT: APPROVE
 ### Khi có issues
 
 ```markdown
-## 📝 Review
+## Review
 
 Hi @dev, found 1 issue that should be fixed before merging — string interpolation
 in the query builder is vulnerable to SQL injection. Overall clean work though!
 
-### ✅ Good Points
+### Good Points
 - Clean separation of concerns in the API layer
 - Proper error handling in the main module
 
-### ⚠️ Needs Fixing
+### Needs Fixing
 1. **SQL injection in query builder** (`db/query.py:42`)
    ```python
    query = f"SELECT * FROM users WHERE id = {user_id}"
@@ -243,7 +208,7 @@ in the query builder is vulnerable to SQL injection. Overall clean work though!
    String interpolation in SQL query allows injection attacks.
    Fix: Use parameterized queries.
 
-### 💡 Suggestions (non-blocking)
+### Suggestions (non-blocking)
 - `main.py:10` — Unused import, consider removing to keep the file clean.
 
 ### Conclusion
@@ -252,23 +217,23 @@ Fix the SQL injection and we're good to merge. Solid work overall!
 VERDICT: REQUEST CHANGES
 ```
 
-### Khi dùng tiếng Việt (`REVIEW_LANGUAGE=vi`)
+### Khi dùng tiếng Việt (`-l vi` hoặc `REVIEW_LANGUAGE=vi`)
 
 Section headers tự động chuyển sang tiếng Việt:
 
 ```markdown
-## 📝 Review
+## Review
 
 Chào @dev, mình thấy PR này có một số điểm làm tốt và cũng có vài điểm cần cải tiến.
 
-### ✅ Điểm tốt
+### Điểm tốt
 - Cấu trúc code rõ ràng, dễ theo dõi
 
-### ⚠️ Cần xử lý
+### Cần xử lý
 1. **Excessive logging** (`src/api/client.ts:68`)
    ...
 
-### 💡 Góp ý nhỏ
+### Góp ý nhỏ
 - ...
 
 ### Kết luận
@@ -302,12 +267,17 @@ Nếu không thể submit formal review, bot thử theo thứ tự:
 
 ### Thay đổi model
 
+```bash
+# Dùng CLI:
+pr-review config --set LLM_MODEL gpt-4o
+pr-review config --set OPENAI_API_BASE https://integrate.api.nvidia.com/v1
+```
+
+Hoặc chỉnh `.env` trực tiếp:
+
 ```env
 # GPT-4o (chất lượng tốt nhất, giá cao):
 LLM_MODEL=gpt-4o
-
-# GPT-4o-mini (tiết kiệm chi phí):
-LLM_MODEL=gpt-4o-mini
 
 # NVIDIA NIM Llama 3.3 70B:
 OPENAI_API_BASE=https://integrate.api.nvidia.com/v1
@@ -316,21 +286,25 @@ LLM_MODEL=meta/llama-3.3-70b-instruct
 # Groq Llama 3.1 (miễn phí, nhanh):
 OPENAI_API_BASE=https://api.groq.com/openai/v1
 LLM_MODEL=llama-3.1-8b-instant
+
+# OpenRouter:
+OPENAI_API_BASE=https://openrouter.ai/api/v1
+
+# Local LM Studio:
+OPENAI_API_BASE=http://localhost:1234/v1
 ```
 
 ### Thay đổi ngôn ngữ review
 
-Hiện tại bot hỗ trợ 2 ngôn ngữ:
+```bash
+# Dùng CLI option (một lần):
+pr-review review <url> -l vi
 
-```env
-# English (mặc định)
-REVIEW_LANGUAGE=en
-
-# Tiếng Việt
-REVIEW_LANGUAGE=vi
+# Hoặc thay đổi mặc định:
+pr-review config --set REVIEW_LANGUAGE vi
 ```
 
-> **Lưu ý:** Khi đổi ngôn ngữ, section headers (Good Points / Needs Fixing / Suggestions / Conclusion) sẽ tự động chuyển sang ngôn ngữ tương ứng (Điểm tốt / Cần xử lý / Góp ý nhỏ / Kết luận).
+> Khi đổi ngôn ngữ, section headers (Good Points / Needs Fixing / Suggestions / Conclusion) sẽ tự động chuyển sang ngôn ngữ tương ứng (Điểm tốt / Cần xử lý / Góp ý nhỏ / Kết luận).
 
 ---
 
@@ -344,18 +318,20 @@ KB được lưu dưới dạng JSON (`latest.json`) với cấu trúc:
 
 | Section | Mô tả | Priority |
 |---|---|---|
-| **Conventions** | Coding patterns, naming conventions | 🔴 HIGH |
-| **Risks** | Risk areas (authentication, secrets, external APIs) | 🔴 HIGH |
-| **Dependencies** | Quan hệ imports/depends_on giữa files | 🟡 MEDIUM |
-| **Summaries** | Mô tả ngắn gọn từng file | 🟢 LOW |
+| **Conventions** | Coding patterns, naming conventions | HIGH |
+| **Risks** | Risk areas (authentication, secrets, external APIs) | HIGH |
+| **Dependencies** | Quan hệ imports/depends_on giữa files | MEDIUM |
+| **Summaries** | Mô tả ngắn gọn từng file | LOW |
 
-### Cách KB hoạt động
+### Sử dụng KB
 
-1. `kb_loader.py` đọc `latest.json` từ thư mục KB
-2. Trích xuất conventions, risks, dependencies, summaries
-3. Format thành markdown block
-4. Inject vào task descriptions của 3 agents đầu (Code Reviewer, Security, Performance)
-5. Agents sử dụng KB context để review theo chuẩn dự án
+```bash
+# Qua CLI option:
+pr-review review <url> -k knowledge_base/CrewAI_Review_Bot
+
+# Hoặc set mặc định trong .env:
+pr-review config --set KB_PATH knowledge_base/CrewAI_Review_Bot
+```
 
 ### Cấu trúc thư mục KB
 
@@ -377,14 +353,15 @@ knowledge_base/
 
 | Lỗi | Nguyên nhân | Cách sửa |
 |---|---|---|
-| `ModuleNotFoundError: No module named 'crewai'` | Chưa cài dependencies | Chạy `pip install -r requirements.txt` |
-| `❌ GITHUB_TOKEN not configured` | Chưa set token trong `.env` | Thêm `GITHUB_TOKEN=ghp-xxx` vào `.env` |
-| `❌ Invalid PR URL` | Sai format URL | Đảm bảo URL có dạng `https://github.com/owner/repo/pull/123` |
-| `❌ Failed to fetch PR: 401` | GitHub token không hợp lệ | Tạo token mới và kiểm tra quyền `repo` |
-| `❌ Failed to fetch PR: 404` | PR không tồn tại hoặc token không có quyền | Kiểm tra URL và quyền của token |
-| `❌ Failed to submit review: 403` | Token không có quyền write | Cấp quyền `repo` cho token |
-| `⚠️ KB file not found` | Sai đường dẫn KB | Kiểm tra `KB_PATH` trong `.env` |
-| `⚠️ KB file has invalid schema` | File JSON corrupt hoặc sai format | Kiểm tra `latest.json` có key `files` dạng list |
+| `pr-review: command not found` | Chưa cài package | Chạy `pip install -e .` |
+| `ModuleNotFoundError: No module named 'crewai'` | Chưa cài dependencies | Chạy `pip install -e .` |
+| `GITHUB_TOKEN not configured` | Chưa set token | Chạy `pr-review init` hoặc `pr-review config --set GITHUB_TOKEN ghp_xxx` |
+| `Invalid PR URL` | Sai format URL | Đảm bảo URL có dạng `https://github.com/owner/repo/pull/123` |
+| `Failed to fetch PR: 401` | GitHub token không hợp lệ | Tạo token mới và kiểm tra quyền `repo` |
+| `Failed to fetch PR: 404` | PR không tồn tại hoặc token không có quyền | Kiểm tra URL và quyền của token |
+| `Failed to submit review: 403` | Token không có quyền write | Cấp quyền `repo` cho token |
+| `KB file not found` | Sai đường dẫn KB | Kiểm tra `KB_PATH` qua `pr-review config` |
+| `KB file has invalid schema` | File JSON corrupt hoặc sai format | Kiểm tra `latest.json` có key `files` dạng list |
 | `Connection error` | Không có internet hoặc firewall chặn | Kiểm tra kết nối mạng |
 | `Incorrect API key provided` (401) | Dùng provider key nhưng base URL sai | Đảm bảo `OPENAI_API_BASE` được set đúng |
 | `Crew Execution Failed` (context limit) | PR quá lớn, vượt context window | Dùng model có context lớn hơn hoặc giảm `KB_MAX_CHARS` |

@@ -6,7 +6,7 @@ from agents.agents import (
     architecture_reviewer, code_reviewer, security_expert,
     performance_engineer, tech_lead,
 )
-from config.settings import REVIEW_LANGUAGE
+import config.settings as settings
 
 # ── Structured output format templates for reviewer agents ──────────────
 
@@ -146,16 +146,16 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
 
     # Build language instruction with section header translations
     lang_names = {"en": "English", "vi": "Vietnamese"}
-    lang_label = lang_names.get(REVIEW_LANGUAGE, REVIEW_LANGUAGE)
+    lang_label = lang_names.get(settings.REVIEW_LANGUAGE, settings.REVIEW_LANGUAGE)
 
     lang_headers = {
         "en": {"good": "Good Points", "fix": "Needs Fixing", "suggest": "Suggestions", "conclusion": "Conclusion", "greeting": "Hi"},
         "vi": {"good": "Điểm tốt", "fix": "Cần xử lý", "suggest": "Góp ý nhỏ", "conclusion": "Kết luận", "greeting": "Chào"},
     }
-    headers = lang_headers.get(REVIEW_LANGUAGE, lang_headers["en"])
+    headers = lang_headers.get(settings.REVIEW_LANGUAGE, lang_headers["en"])
 
     language_block = ""
-    if REVIEW_LANGUAGE != "en":
+    if settings.REVIEW_LANGUAGE != "en":
         language_block = (
             f"\n\n**LANGUAGE:** Write the ENTIRE review in {lang_label}. "
             f"All section headers, explanations, and comments must be in {lang_label}. "

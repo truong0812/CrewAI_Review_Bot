@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pr-review-bot"
+version = "1.0.0"
+description = "Multi-agent PR review bot using CrewAI"
+requires-python = ">=3.10"
+dependencies = [
+    "crewai",
+    "langchain-openai",
+    "python-dotenv",
+    "click>=8.1",
+    "httpx",
+]
+
+[project.scripts]
+pr-review = "cli:cli"
+
+[tool.setuptools.packages.find]
+include = ["agents*", "tasks*", "config*", "github_utils*"]
+
+[tool.setuptools]
+py-modules = ["cli", "kb_loader"]
