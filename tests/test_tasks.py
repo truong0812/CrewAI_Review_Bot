@@ -124,6 +124,13 @@ class TestBuildTasksWithKnowledgeBase:
         assert len(tasks) == 5
         assert "Knowledge Base" not in tasks[0].description
 
+    def test_kb_is_context_not_evidence(self):
+        kb = "RISK: src/db.py may contain SQL injection"
+        tasks = build_tasks("code", knowledge_base=kb)
+        for task in tasks[:4]:
+            assert "does NOT prove any issue" in task.description
+            assert "exact changed code in the PR diff" in task.description
+
 
 class TestArchitectureReviewer:
     """Test the architecture reviewer task (first in pipeline)."""
@@ -153,6 +160,31 @@ class TestArchitectureReviewer:
         code = "SPECIAL_ARCH_CODE_999"
         tasks = build_tasks(code)
         assert code in tasks[0].description
+
+
+class TestFalsePositiveGuardrails:
+    """Regression tests for prompt rules that reduce false positives."""
+
+    def test_reviewer_tasks_limit_findings_to_changed_diff_lines(self):
+        tasks = build_tasks("code")
+        for task in tasks[:4]:
+            assert "Only added or modified lines can be findings" in task.description
+            assert "Do NOT invent code patterns" in task.description
+
+    def test_tech_lead_discards_kb_only_and_unreferenced_findings(self):
+        tasks = build_tasks("code")
+        desc = tasks[4].description
+        assert "Project Knowledge Base with no proof in changed code" in desc
+        assert "If you cannot find the exact code in the diff, do NOT mention it" in desc
+        assert "When in doubt, prefer APPROVE" in desc
+
+    def test_task_prompts_do_not_contain_mojibake(self):
+        tasks = build_tasks("code", knowledge_base="CONVENTION: Use type hints")
+        markers = ("â", "Ã", "Ä", "ð", "Â")
+        for task in tasks:
+            for marker in markers:
+                assert marker not in task.description
+                assert marker not in task.expected_output
 
 
 class TestStructuredOutputFormat:

@@ -27,10 +27,10 @@ def parse_verdict(review_text: str) -> str:
     if "approve" in text_lower:
         return "APPROVE"
 
-    # Truncated verdict — LLM ran out of tokens before finishing.
-    # Infer from review content: if blocking issues section has numbered items → REQUEST_CHANGES
+    # Truncated verdict: LLM ran out of tokens before finishing.
+    # Infer from review content: if blocking issues section has numbered items, request changes.
     has_blocking = bool(re.search(
-        r"(?:needs fixing|cần xử lý|needs_fixing)\s*\n.*\d+\.\s+\*\*",
+        r"(?:needs fixing|cần xử lý|can xu ly|needs_fixing)\s*\n.*\d+\.\s+\*\*",
         text_lower, re.IGNORECASE | re.DOTALL,
     ))
     if has_blocking:
