@@ -343,7 +343,7 @@ Nếu không thể submit formal review, bot thử theo thứ tự:
 | Variable | Description | Default |
 |---|---|---|
 | `MAX_CONCURRENT_AGENTS` | Max agents chạy concurrent | `4` |
-| `AGENT_TIMEOUT_SECONDS` | Timeout per agent (giây) | `45` |
+| `AGENT_TIMEOUT_SECONDS` | Timeout budget per task (giây). Total review timeout = value × 5 tasks | `45` |
 
 ### Retry Configuration
 

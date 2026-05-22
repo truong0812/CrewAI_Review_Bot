@@ -1,6 +1,7 @@
 """PR Review Bot — CLI interface using Click."""
 
 import os
+import threading
 import re
 import sys
 
@@ -52,6 +53,32 @@ def cli():
             pass
 
 
+def _run_with_timeout(crew, timeout_seconds: int):
+    """Run crew.kickoff() with a total timeout across all agents."""
+    result = None
+    exc = None
+
+    def _worker():
+        nonlocal result, exc
+        try:
+            result = crew.kickoff()
+        except Exception as e:
+            exc = e
+
+    thread = threading.Thread(target=_worker, daemon=True)
+    thread.start()
+    thread.join(timeout=timeout_seconds)
+
+    if thread.is_alive():
+        raise TimeoutError(
+            f"Review timed out after {timeout_seconds}s. "
+            "Consider reducing PR size or increasing AGENT_TIMEOUT_SECONDS."
+        )
+    if exc:
+        raise exc
+    return result
+
+
 @cli.command()
 @click.argument("pr_url")
 @click.option("--kb-path", "-k", default=None, help="Knowledge base directory path")
@@ -62,8 +89,8 @@ def cli():
 def review(pr_url, kb_path, language, output, dry_run, verbose):
     """Run a multi-agent review on a GitHub pull request."""
     from config.settings import (
-        GITHUB_TOKEN, API_TIMEOUT, KB_PATH, KB_MAX_CHARS,
-        MAX_TOTAL_CHARS, SMALL_PR_THRESHOLD, MEDIUM_PR_THRESHOLD,
+        GITHUB_TOKEN, API_TIMEOUT, KB_MAX_CHARS,
+        MAX_TOTAL_CHARS, MAX_PATCH_CHARS, SMALL_PR_THRESHOLD, MEDIUM_PR_THRESHOLD,
         validate_settings, apply_overrides,
     )
     from github_utils.client import GitHubClient
@@ -72,7 +99,7 @@ def review(pr_url, kb_path, language, output, dry_run, verbose):
     apply_overrides(language=language, output_path=output, kb_path=kb_path)
 
     # Re-import after overrides to get updated values
-    from config.settings import REVIEW_LANGUAGE, REVIEW_OUTPUT_PATH, KB_PATH as _KB
+    from config.settings import REVIEW_OUTPUT_PATH, KB_PATH as _KB
 
     if not GITHUB_TOKEN or "your-github-token" in GITHUB_TOKEN:
         click.echo("Error: GITHUB_TOKEN not configured. Run 'pr-review init' or set it in .env.")
@@ -84,7 +111,7 @@ def review(pr_url, kb_path, language, output, dry_run, verbose):
         click.echo(f"Configuration error: {e}")
         raise SystemExit(1)
 
-    gh = GitHubClient(GITHUB_TOKEN, timeout=API_TIMEOUT)
+    gh = GitHubClient(GITHUB_TOKEN, timeout=API_TIMEOUT, max_patch_chars=MAX_PATCH_CHARS)
 
     try:
         owner, repo, pr_number = GitHubClient.parse_pr_url(pr_url)
@@ -171,12 +198,18 @@ def review(pr_url, kb_path, language, output, dry_run, verbose):
     from agents.agents import all_agents
     from tasks.tasks import build_tasks
 
-    # Build tasks
-    tasks = build_tasks(code_content, knowledge_base=kb_content, pr_author=pr_author)
+    # Build tasks — pass concurrency limit from throttle config
+    tasks = build_tasks(
+        code_content,
+        knowledge_base=kb_content,
+        pr_author=pr_author,
+        max_concurrent=throttle_config["max_agents"],
+    )
 
     # Run the crew
+    active_reviewers = min(4, throttle_config["max_agents"])
     click.echo("Starting multi-agent review...")
-    click.echo("  4 reviewers running in parallel, then Tech Lead synthesis")
+    click.echo(f"  {active_reviewers} reviewers running in parallel, then Tech Lead synthesis")
     if kb_content:
         click.echo("  (with Knowledge Base context)")
     click.echo("")
@@ -188,7 +221,8 @@ def review(pr_url, kb_path, language, output, dry_run, verbose):
         verbose=verbose,
     )
 
-    result = pr_review_crew.kickoff()
+    total_timeout = throttle_config["timeout"] * len(tasks)
+    result = _run_with_timeout(pr_review_crew, total_timeout)
 
     # Display result
     click.echo("")
