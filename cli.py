@@ -5,12 +5,6 @@ import sys
 
 import click
 
-# Ensure the project root is on sys.path so imports work
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-# Re-export parse_verdict from engine for backward compat
-from engine import parse_verdict  # noqa: F401
-
 
 @click.group()
 @click.version_option(version="1.0.0", prog_name="pr-review")
@@ -53,9 +47,6 @@ def review(pr_url, kb_path, language, output, dry_run, verbose):
             dry_run=dry_run,
             verbose=verbose,
         )
-    except (ValueError, TimeoutError) as e:
-        click.echo(f"Error: {e}")
-        raise SystemExit(1)
     except Exception as e:
         click.echo(f"Error: {e}")
         raise SystemExit(1)

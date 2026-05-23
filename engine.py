@@ -48,19 +48,22 @@ def _run_with_timeout(crew, timeout_seconds: int):
     """Run crew.kickoff() with a total timeout across all agents."""
     result = None
     exc = None
+    timed_out = threading.Event()
 
     def _worker():
         nonlocal result, exc
         try:
             result = crew.kickoff()
         except Exception as e:
-            exc = e
+            if not timed_out.is_set():
+                exc = e
 
     thread = threading.Thread(target=_worker, daemon=True)
     thread.start()
     thread.join(timeout=timeout_seconds)
 
     if thread.is_alive():
+        timed_out.set()
         raise TimeoutError(
             f"Review timed out after {timeout_seconds}s. "
             "Consider reducing PR size or increasing AGENT_TIMEOUT_SECONDS."

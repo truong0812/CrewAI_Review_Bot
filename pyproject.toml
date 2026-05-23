@@ -25,3 +25,6 @@ include = ["agents*", "tasks*", "config*", "github_utils*", "webhook*"]
 
 [tool.setuptools]
 py-modules = ["cli", "kb_loader", "engine", "review_parser", "requirements_extractor"]
+
+[tool.setuptools.package-dir]
+"" = "."
