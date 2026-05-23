@@ -221,7 +221,7 @@ def review(pr_url, kb_path, language, output, dry_run, verbose):
         verbose=verbose,
     )
 
-    total_timeout = throttle_config["timeout"] * len(tasks)
+    total_timeout = throttle_config["timeout"]
     result = _run_with_timeout(pr_review_crew, total_timeout)
 
     # Display result
