@@ -14,6 +14,60 @@ Hướng dẫn cài đặt, cấu hình và sử dụng PR Review Bot CLI.
 
 ---
 
+## Architecture
+
+```
+┌─────────────────┐     ┌──────────────┐     ┌─────────────────┐
+│  PR URL + KB    │────▶│  Fetch PR    │────▶│  Load KB        │
+│  (CLI input)    │     │  from GitHub │     │  (optional)     │
+└─────────────────┘     └──────────────┘     └────────┬────────┘
+                                                      │
+                                                      ▼
+┌─────────────────┐     ┌──────────────┐     ┌─────────────────┐
+│  Submit Review   │◀────│  Parse       │◀────│  5 Agents Run   │
+│  to GitHub       │     │  Verdict     │     │  (sequential)   │
+│  (APPROVE/RCC)   │     │  APPROVE/RCC │     │  + KB context   │
+└─────────────────┘     └──────────────┘     └─────────────────┘
+         │
+         ▼ (fallback)
+┌─────────────────┐     ┌──────────────┐
+│  Post Comment   │────▶│  Save Local  │
+│  (issue comment)│     │  (markdown)  │
+└─────────────────┘     └──────────────┘
+```
+
+### Agents Pipeline
+
+4 reviewers chạy song song (async), sau đó Tech Lead tổng hợp:
+
+| # | Agent | Role |
+|---|---|---|
+| 1 | **Architecture Reviewer** | SOLID, coupling/cohesion, design patterns, dependencies |
+| 2 | **Code Reviewer** | PEP 8, naming, readability, dead code, error handling |
+| 3 | **Security Expert** | OWASP Top 10, injection, secrets, crypto |
+| 4 | **Performance Engineer** | Algorithm complexity, memory, inefficient loops |
+| 5 | **Tech Lead** | Tổng hợp 4 reports → final review + verdict |
+
+### File Structure
+
+```
+pr-review-bot/
+├── cli.py                   # CLI interface (Click)
+├── main.py                  # Backward-compat wrapper → cli.py
+├── kb_loader.py             # Knowledge Base loader
+├── agents/
+│   └── agents.py            # 5 agent definitions
+├── tasks/
+│   └── tasks.py             # Task definitions + structured output formats
+├── config/
+│   └── settings.py          # Env-based configuration
+├── github_utils/
+│   └── client.py            # GitHub API client (httpx)
+└── knowledge_base/          # Optional project KB
+```
+
+---
+
 ## Cài đặt
 
 ### 1. Clone hoặc tải dự án
@@ -164,7 +218,7 @@ Cách cũ vẫn hoạt động:
 python main.py https://github.com/owner/repo/pull/123
 ```
 
-Sẽ tự động chuyển sang `pr-review review`.
+`main.py` là wrapper tự động chuyển sang `pr-review review`.
 
 ---
 
@@ -253,16 +307,56 @@ Nếu không thể submit formal review, bot thử theo thứ tự:
 
 ## Configuration Reference
 
+### LLM Configuration
+
 | Variable | Description | Default |
 |---|---|---|
-| `OPENAI_API_KEY` | OpenAI API key (hoặc compatible provider) | — |
+| `OPENAI_API_KEY` | API key (OpenAI hoặc compatible provider) | — |
 | `OPENAI_API_BASE` | API base URL | `https://api.openai.com/v1` |
 | `LLM_MODEL` | Tên model sử dụng | `gpt-4o-mini` |
-| `GITHUB_TOKEN` | GitHub Personal Access Token (cần `repo` scope) | — |
+
+### GitHub Configuration
+
+| Variable | Description | Default |
+|---|---|---|
+| `GITHUB_TOKEN` | GitHub PAT (cần `repo` scope) | — |
 | `API_TIMEOUT` | Timeout cho GitHub API calls (giây) | `30` |
-| `REVIEW_OUTPUT_PATH` | Đường dẫn lưu review local (khi GitHub fail) | `review_output.md` |
-| `REVIEW_LANGUAGE` | Ngôn ngữ review output — hỗ trợ `en` (English) và `vi` (Vietnamese) | `en` |
-| `KB_PATH` | Đường dẫn tới thư mục Knowledge Base | `""` (tắt) |
+| `REVIEW_OUTPUT_PATH` | Đường dẫn lưu review local (khi GitHub fail) | `""` |
+
+### Review Configuration
+
+| Variable | Description | Default |
+|---|---|---|
+| `REVIEW_LANGUAGE` | Ngôn ngữ output: `en` hoặc `vi` | `en` |
+
+### Dynamic Context Sizing
+
+| Variable | Description | Default |
+|---|---|---|
+| `MAX_TOTAL_CHARS` | Tổng max chars cho PR code context | `20000` |
+| `MAX_PATCH_CHARS` | Max chars per file patch | `10000` |
+| `SMALL_PR_THRESHOLD` | Số files để phân loại SMALL PR | `5` |
+| `MEDIUM_PR_THRESHOLD` | Số files để phân loại MEDIUM PR | `15` |
+
+### Performance Throttling
+
+| Variable | Description | Default |
+|---|---|---|
+| `MAX_CONCURRENT_AGENTS` | Max agents chạy concurrent | `4` |
+| `AGENT_TIMEOUT_SECONDS` | Total review timeout budget (giây). Scaled by PR size via throttling | `45` |
+
+### Retry Configuration
+
+| Variable | Description | Default |
+|---|---|---|
+| `MAX_RETRY_ATTEMPTS` | Số lần retry khi API fail | `3` |
+| `RETRY_DELAY_SECONDS` | Delay ban đầu giữa các lần retry (giây) | `2` |
+
+### Knowledge Base
+
+| Variable | Description | Default |
+|---|---|---|
+| `KB_PATH` | Đường dẫn tới thư mục KB | `""` (tắt) |
 | `KB_MAX_CHARS` | Giới hạn ký tự cho KB context | `8000` |
 
 ### Thay đổi model
@@ -364,4 +458,4 @@ knowledge_base/
 | `KB file has invalid schema` | File JSON corrupt hoặc sai format | Kiểm tra `latest.json` có key `files` dạng list |
 | `Connection error` | Không có internet hoặc firewall chặn | Kiểm tra kết nối mạng |
 | `Incorrect API key provided` (401) | Dùng provider key nhưng base URL sai | Đảm bảo `OPENAI_API_BASE` được set đúng |
-| `Crew Execution Failed` (context limit) | PR quá lớn, vượt context window | Dùng model có context lớn hơn hoặc giảm `KB_MAX_CHARS` |
+| `Crew Execution Failed` (context limit) | PR quá lớn, vượt context window | Tăng `MAX_TOTAL_CHARS` hoặc dùng model có context lớn hơn |

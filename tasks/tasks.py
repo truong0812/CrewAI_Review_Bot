@@ -144,13 +144,14 @@ End with a Summary section:
 """
 
 
-def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> list[Task]:
+def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "", max_concurrent: int = 4) -> list[Task]:
     """Build tasks with the given code/diff content for review.
 
     Args:
         code: The PR code/diff content formatted for review.
         knowledge_base: Optional formatted KB context to inject into tasks.
         pr_author: Optional GitHub username of the PR author.
+        max_concurrent: Max number of reviewer tasks to run in parallel.
 
     Returns:
         List of 5 Task objects to be executed sequentially.
@@ -453,5 +454,11 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "") -> lis
         agent=tech_lead,
         context=[architecture_review, review_code_quality, audit_security, analyze_performance],
     )
+
+    # Apply concurrency limit: only first `max_concurrent` reviewer tasks run in parallel.
+    reviewer_tasks = [architecture_review, review_code_quality, audit_security, analyze_performance]
+    for i, task in enumerate(reviewer_tasks):
+        if i >= max_concurrent:
+            task.async_execution = False
 
     return [architecture_review, review_code_quality, audit_security, analyze_performance, compile_final_review]

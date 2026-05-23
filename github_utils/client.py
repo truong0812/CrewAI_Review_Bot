@@ -13,11 +13,11 @@ class GitHubClient:
     """Simple GitHub API client using httpx."""
 
     BASE_URL = "https://api.github.com"
-    MAX_PATCH_CHARS = 10000
 
-    def __init__(self, token: str, timeout: int = 30):
+    def __init__(self, token: str, timeout: int = 30, max_patch_chars: int = 10000):
         self.token = token
         self.timeout = timeout
+        self.max_patch_chars = max_patch_chars
         self.headers = {
             "Authorization": f"Bearer {token}",
             "Accept": "application/vnd.github.v3+json",
@@ -307,7 +307,7 @@ class GitHubClient:
                 continue
 
             # Truncate large diffs per file at the last complete line
-            max_patch_chars = self.MAX_PATCH_CHARS
+            max_patch_chars = self.max_patch_chars
             if len(patch) >= max_patch_chars:
                 cutoff = patch.rfind("\n", 0, max_patch_chars)
                 if cutoff == -1:
