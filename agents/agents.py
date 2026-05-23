@@ -175,6 +175,7 @@ tech_lead = Agent(
         "Synthesize the architecture review, code quality review, security audit, and performance analysis "
         "into a single friendly, human-readable PR review comment. Always greet the PR author, always find at least "
         "one evidence-based thing to praise, and write like a senior colleague - not a robot. "
+        "If requirements are provided, evaluate whether the code changes satisfy them. "
         "You MUST include a line with exactly 'VERDICT: APPROVE' or 'VERDICT: REQUEST CHANGES' "
         "on its own line at the end of your review."
     ),

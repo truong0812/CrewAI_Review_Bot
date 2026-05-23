@@ -144,7 +144,7 @@ End with a Summary section:
 """
 
 
-def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "", max_concurrent: int = 4) -> list[Task]:
+def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "", max_concurrent: int = 4, requirements: str = "") -> list[Task]:
     """Build tasks with the given code/diff content for review.
 
     Args:
@@ -152,6 +152,7 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "", max_co
         knowledge_base: Optional formatted KB context to inject into tasks.
         pr_author: Optional GitHub username of the PR author.
         max_concurrent: Max number of reviewer tasks to run in parallel.
+        requirements: Optional formatted requirements string from PR description.
 
     Returns:
         List of 5 Task objects to be executed sequentially.
@@ -204,6 +205,17 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "", max_co
         author_block = (
             f"\n\n**PR AUTHOR:** The PR author is @{pr_author}. "
             f"Start your review by greeting them (e.g., 'Hi @{pr_author},' or 'Chào @{pr_author},')."
+        )
+
+    requirements_block = ""
+    if requirements:
+        requirements_block = (
+            "\n\n**REQUIREMENT COVERAGE CHECK:**\n"
+            "The following requirements were extracted from the PR description. "
+            "Evaluate whether the code changes satisfy each requirement. "
+            "For each requirement, classify as: MET, PARTIALLY MET, or NOT MET. "
+            "Include this evaluation in your findings.\n\n"
+            + requirements
         )
 
     architecture_review = Task(
@@ -432,9 +444,11 @@ def build_tasks(code: str, knowledge_base: str = "", pr_author: str = "", max_co
             "Place this on its own separate line at the very end of your review."
             "{author_block}"
             "{language_block}"
+            "{requirements_block}"
         ).format(
             author_block=author_block,
             language_block=language_block,
+            requirements_block=requirements_block,
             good_points_header=headers["good"],
             needs_fixing_header=headers["fix"],
             suggestions_header=headers["suggest"],

@@ -179,6 +179,40 @@ class GitHubClient:
         data = resp.json()
         return data.get("user", {}).get("login", "")
 
+    def list_reviews(self, owner: str, repo: str, pr_number: int) -> list[dict]:
+        """List reviews for a PR, most recent first."""
+        url = f"{self.BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}/reviews"
+        resp = self._get_with_retry(url)
+        reviews = resp.json()
+        if not isinstance(reviews, list):
+            return []
+        reviews.sort(key=lambda r: r.get("submitted_at", ""), reverse=True)
+        return reviews
+
+    def list_open_prs(self, owner: str, repo: str) -> list[dict]:
+        """List open pull requests for a repository."""
+        url = f"{self.BASE_URL}/repos/{owner}/{repo}/pulls"
+        resp = self._get_with_retry(url, params={"state": "open", "per_page": 50})
+        prs = resp.json()
+        return prs if isinstance(prs, list) else []
+
+    def fetch_linked_issues(self, owner: str, repo: str, issue_numbers: list[int]) -> list[dict]:
+        """Fetch title and body for linked issues."""
+        issues = []
+        for num in issue_numbers:
+            url = f"{self.BASE_URL}/repos/{owner}/{repo}/issues/{num}"
+            try:
+                resp = self._get_with_retry(url)
+                data = resp.json()
+                issues.append({
+                    "number": num,
+                    "title": data.get("title", ""),
+                    "body": data.get("body", ""),
+                })
+            except Exception:
+                pass
+        return issues
+
     def post_comment(self, owner: str, repo: str, pr_number: int, body: str) -> dict:
         """Post a comment on a PR (issue comment)."""
         url = f"{self.BASE_URL}/repos/{owner}/{repo}/issues/{pr_number}/comments"

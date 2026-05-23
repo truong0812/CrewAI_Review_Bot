@@ -13,13 +13,15 @@ dependencies = [
     "python-dotenv",
     "click>=8.1",
     "httpx",
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.29.0",
 ]
 
 [project.scripts]
 pr-review = "cli:cli"
 
 [tool.setuptools.packages.find]
-include = ["agents*", "tasks*", "config*", "github_utils*"]
+include = ["agents*", "tasks*", "config*", "github_utils*", "webhook*"]
 
 [tool.setuptools]
-py-modules = ["cli", "kb_loader"]
+py-modules = ["cli", "kb_loader", "engine", "review_parser", "requirements_extractor"]
