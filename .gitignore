@@ -13,6 +13,9 @@ venv/
 # Output
 review_output.md
 
+# Conversation digests
+conversations/
+
 # IDE
 .vscode/
 .idea/

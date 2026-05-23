@@ -47,7 +47,7 @@ class _Config:
 
         # Performance Throttling
         self.MAX_CONCURRENT_AGENTS = _env_int("MAX_CONCURRENT_AGENTS", 4)
-        self.AGENT_TIMEOUT_SECONDS = _env_int("AGENT_TIMEOUT_SECONDS", 45)
+        self.AGENT_TIMEOUT_SECONDS = _env_int("AGENT_TIMEOUT_SECONDS", 180)
 
         # Retry Configuration
         self.MAX_RETRY_ATTEMPTS = _env_int("MAX_RETRY_ATTEMPTS", 3)
@@ -56,6 +56,22 @@ class _Config:
         # Knowledge Base Configuration
         self.KB_PATH = os.getenv("KB_PATH", "")
         self.KB_MAX_CHARS = _env_int("KB_MAX_CHARS", 8000)
+
+        # Webhook Configuration
+        self.WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "")
+        self.WEBHOOK_PORT = _env_int("WEBHOOK_PORT", 8000)
+        self.WEBHOOK_HOST = os.getenv("WEBHOOK_HOST", "0.0.0.0")
+        self.WEBHOOK_DEV_MODE = os.getenv("WEBHOOK_DEV_MODE", "false").lower() in ("true", "1", "yes")
+        self.RESPONSE_LOOP_ENABLED = os.getenv("RESPONSE_LOOP_ENABLED", "true").lower() in ("true", "1", "yes")
+        self.AUTO_REVIEW_ON_PUSH = os.getenv("AUTO_REVIEW_ON_PUSH", "true").lower() in ("true", "1", "yes")
+
+        # Conversation Digest Configuration
+        self.CONVERSATIONS_DIR = os.getenv("CONVERSATIONS_DIR", "") or os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "conversations"
+        )
+        self.MAX_DIGEST_CHARS = _env_int("MAX_DIGEST_CHARS", 2000)
+        self.MAX_THREAD_ENTRIES = _env_int("MAX_THREAD_ENTRIES", 5)
+        self.CONVERSATION_MAX_AGE_DAYS = _env_int("CONVERSATION_MAX_AGE_DAYS", 14)
 
     def apply_overrides(
         self,
@@ -91,7 +107,7 @@ class _Config:
             raise ValueError(
                 f"MAX_CONCURRENT_AGENTS must be between 1 and 10, got {self.MAX_CONCURRENT_AGENTS}"
             )
-        if self.AGENT_TIMEOUT_SECONDS < 10 or self.AGENT_TIMEOUT_SECONDS > 120:
+        if self.AGENT_TIMEOUT_SECONDS < 10 or self.AGENT_TIMEOUT_SECONDS > 600:
             raise ValueError(
                 f"AGENT_TIMEOUT_SECONDS must be between 10 and 120, got {self.AGENT_TIMEOUT_SECONDS}"
             )
@@ -123,6 +139,16 @@ class _Config:
             "RETRY_DELAY_SECONDS": self.RETRY_DELAY_SECONDS,
             "KB_PATH": self.KB_PATH,
             "KB_MAX_CHARS": self.KB_MAX_CHARS,
+            "WEBHOOK_SECRET": self.WEBHOOK_SECRET,
+            "WEBHOOK_PORT": self.WEBHOOK_PORT,
+            "WEBHOOK_HOST": self.WEBHOOK_HOST,
+            "WEBHOOK_DEV_MODE": self.WEBHOOK_DEV_MODE,
+            "RESPONSE_LOOP_ENABLED": self.RESPONSE_LOOP_ENABLED,
+            "AUTO_REVIEW_ON_PUSH": self.AUTO_REVIEW_ON_PUSH,
+            "CONVERSATIONS_DIR": self.CONVERSATIONS_DIR,
+            "MAX_DIGEST_CHARS": self.MAX_DIGEST_CHARS,
+            "MAX_THREAD_ENTRIES": self.MAX_THREAD_ENTRIES,
+            "CONVERSATION_MAX_AGE_DAYS": self.CONVERSATION_MAX_AGE_DAYS,
         }
 
 

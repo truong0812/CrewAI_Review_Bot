@@ -1,8 +1,8 @@
-"""Tests for main.py — parse_verdict function."""
+"""Tests for engine.py — parse_verdict function."""
 
 import pytest
 
-from main import parse_verdict
+from engine import parse_verdict
 
 
 class TestParseVerdict:
