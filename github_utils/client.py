@@ -101,7 +101,7 @@ class GitHubClient:
             },
             "LARGE": {
                 "max_agents": max(2, cfg.MAX_CONCURRENT_AGENTS // 2),
-                "timeout": max(15, cfg.AGENT_TIMEOUT_SECONDS // 2),
+                "timeout": cfg.AGENT_TIMEOUT_SECONDS + 60,
                 "priority_only": True,
             },
         }

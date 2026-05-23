@@ -14,7 +14,6 @@ if sys.platform == "win32":
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from cli import cli  # noqa: E402
-from engine import parse_verdict  # noqa: F401 — re-export for backward compat
 
 if __name__ == "__main__":
     args = ["review"] + sys.argv[1:]
