@@ -16,7 +16,7 @@ logger = logging.getLogger("pr-review-bot.webhook")
 app = FastAPI(title="PR Review Bot Webhook")
 
 # ThreadPool for running blocking CrewAI reviews
-_executor = ThreadPoolExecutor(max_workers=2)
+_executor = ThreadPoolExecutor(max_workers=cfg.WEBHOOK_MAX_WORKERS)
 
 
 @app.on_event("startup")

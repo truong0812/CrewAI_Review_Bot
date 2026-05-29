@@ -83,22 +83,22 @@ class TestGitHubClientInit:
 
 
 class TestFetchPrFiles:
-    @patch("github_utils.client.httpx.get")
-    def test_single_page(self, mock_get, client):
+    @patch("github_utils.client.httpx.request")
+    def test_single_page(self, mock_request, client):
         mock_resp = MagicMock()
         mock_resp.json.return_value = [
             {"filename": "a.py", "status": "added", "patch": "+++ a.py"},
             {"filename": "b.py", "status": "modified", "patch": "--- b.py"},
         ]
         mock_resp.raise_for_status = MagicMock()
-        mock_get.return_value = mock_resp
+        mock_request.return_value = mock_resp
 
         files = client.fetch_pr_files("owner", "repo", 1)
         assert len(files) == 2
         assert files[0]["filename"] == "a.py"
 
-    @patch("github_utils.client.httpx.get")
-    def test_pagination(self, mock_get, client):
+    @patch("github_utils.client.httpx.request")
+    def test_pagination(self, mock_request, client):
         page1_resp = MagicMock()
         page1_resp.json.return_value = [{"filename": f"file_{i}.py"} for i in range(100)]
         page1_resp.raise_for_status = MagicMock()
@@ -107,17 +107,17 @@ class TestFetchPrFiles:
         page2_resp.json.return_value = [{"filename": "last.py"}]
         page2_resp.raise_for_status = MagicMock()
 
-        mock_get.side_effect = [page1_resp, page2_resp]
+        mock_request.side_effect = [page1_resp, page2_resp]
 
         files = client.fetch_pr_files("owner", "repo", 1)
         assert len(files) == 101
 
-    @patch("github_utils.client.httpx.get")
-    def test_empty_pr(self, mock_get, client):
+    @patch("github_utils.client.httpx.request")
+    def test_empty_pr(self, mock_request, client):
         mock_resp = MagicMock()
         mock_resp.json.return_value = []
         mock_resp.raise_for_status = MagicMock()
-        mock_get.return_value = mock_resp
+        mock_request.return_value = mock_resp
 
         files = client.fetch_pr_files("owner", "repo", 1)
         assert files == []
@@ -129,12 +129,12 @@ class TestFetchPrFiles:
 
 
 class TestFetchPrDiff:
-    @patch("github_utils.client.httpx.get")
-    def test_returns_diff_text(self, mock_get, client):
+    @patch("github_utils.client.httpx.request")
+    def test_returns_diff_text(self, mock_request, client):
         mock_resp = MagicMock()
         mock_resp.text = "diff --git a/file.py b/file.py\n+++ file.py"
         mock_resp.raise_for_status = MagicMock()
-        mock_get.return_value = mock_resp
+        mock_request.return_value = mock_resp
 
         diff = client.fetch_pr_diff("owner", "repo", 1)
         assert "diff --git" in diff
@@ -146,23 +146,23 @@ class TestFetchPrDiff:
 
 
 class TestFetchPrTitleAndBody:
-    @patch("github_utils.client.httpx.get")
-    def test_returns_title_and_body(self, mock_get, client):
+    @patch("github_utils.client.httpx.request")
+    def test_returns_title_and_body(self, mock_request, client):
         mock_resp = MagicMock()
         mock_resp.json.return_value = {"title": "Fix bug", "body": "Description here"}
         mock_resp.raise_for_status = MagicMock()
-        mock_get.return_value = mock_resp
+        mock_request.return_value = mock_resp
 
         result = client.fetch_pr_title_and_body("owner", "repo", 1)
         assert result["title"] == "Fix bug"
         assert result["body"] == "Description here"
 
-    @patch("github_utils.client.httpx.get")
-    def test_missing_body_defaults_empty(self, mock_get, client):
+    @patch("github_utils.client.httpx.request")
+    def test_missing_body_defaults_empty(self, mock_request, client):
         mock_resp = MagicMock()
         mock_resp.json.return_value = {"title": "No desc PR"}
         mock_resp.raise_for_status = MagicMock()
-        mock_get.return_value = mock_resp
+        mock_request.return_value = mock_resp
 
         result = client.fetch_pr_title_and_body("owner", "repo", 1)
         assert result["body"] == ""
@@ -174,22 +174,22 @@ class TestFetchPrTitleAndBody:
 
 
 class TestGetPrHeadCommit:
-    @patch("github_utils.client.httpx.get")
-    def test_returns_sha(self, mock_get, client):
+    @patch("github_utils.client.httpx.request")
+    def test_returns_sha(self, mock_request, client):
         mock_resp = MagicMock()
         mock_resp.json.return_value = {"head": {"sha": "abc123def"}}
         mock_resp.raise_for_status = MagicMock()
-        mock_get.return_value = mock_resp
+        mock_request.return_value = mock_resp
 
         sha = client.get_pr_head_commit("owner", "repo", 1)
         assert sha == "abc123def"
 
-    @patch("github_utils.client.httpx.get")
-    def test_missing_head_raises(self, mock_get, client):
+    @patch("github_utils.client.httpx.request")
+    def test_missing_head_raises(self, mock_request, client):
         mock_resp = MagicMock()
         mock_resp.json.return_value = {"title": "PR without head"}
         mock_resp.raise_for_status = MagicMock()
-        mock_get.return_value = mock_resp
+        mock_request.return_value = mock_resp
 
         with pytest.raises(ValueError, match="missing 'head.sha'"):
             client.get_pr_head_commit("owner", "repo", 1)
@@ -201,45 +201,45 @@ class TestGetPrHeadCommit:
 
 
 class TestSubmitReview:
-    @patch("github_utils.client.httpx.post")
-    def test_successful_review(self, mock_post, client):
+    @patch("github_utils.client.httpx.request")
+    def test_successful_review(self, mock_request, client):
         mock_resp = MagicMock()
         mock_resp.json.return_value = {"html_url": "https://github.com/owner/repo/pull/1#review"}
         mock_resp.raise_for_status = MagicMock()
-        mock_post.return_value = mock_resp
+        mock_request.return_value = mock_resp
 
         result = client.submit_review(
             "owner", "repo", 1, "sha123", "LGTM", "APPROVE"
         )
         assert "html_url" in result
 
-    @patch("github_utils.client.httpx.post")
-    def test_review_with_inline_comments(self, mock_post, client):
+    @patch("github_utils.client.httpx.request")
+    def test_review_with_inline_comments(self, mock_request, client):
         mock_resp = MagicMock()
         mock_resp.json.return_value = {"id": 42}
         mock_resp.raise_for_status = MagicMock()
-        mock_post.return_value = mock_resp
+        mock_request.return_value = mock_resp
 
         comments = [{"path": "a.py", "line": 10, "body": "Fix this"}]
         client.submit_review("owner", "repo", 1, "sha", "body", "COMMENT", comments=comments)
 
-        call_args = mock_post.call_args
+        call_args = mock_request.call_args
         payload = call_args.kwargs.get("json", call_args[1].get("json"))
         assert "comments" in payload
 
-    @patch("github_utils.client.httpx.post")
-    def test_timeout_raises_timeout_error(self, mock_post, client):
-        mock_post.side_effect = httpx.TimeoutException("timeout")
+    @patch("github_utils.client.httpx.request")
+    def test_timeout_raises_timeout_error(self, mock_request, client):
+        mock_request.side_effect = httpx.TimeoutException("timeout")
 
         with pytest.raises(TimeoutError, match="timed out"):
             client.submit_review("owner", "repo", 1, "sha", "body", "APPROVE")
 
-    @patch("github_utils.client.httpx.post")
-    def test_http_error_raises_runtime_error(self, mock_post, client):
+    @patch("github_utils.client.httpx.request")
+    def test_http_error_raises_runtime_error(self, mock_request, client):
         mock_resp = MagicMock()
         mock_resp.status_code = 422
         mock_resp.text = "Validation Failed"
-        mock_post.side_effect = httpx.HTTPStatusError(
+        mock_request.side_effect = httpx.HTTPStatusError(
             "error", request=MagicMock(), response=mock_resp
         )
 
@@ -253,12 +253,12 @@ class TestSubmitReview:
 
 
 class TestPostComment:
-    @patch("github_utils.client.httpx.post")
-    def test_posts_issue_comment(self, mock_post, client):
+    @patch("github_utils.client.httpx.request")
+    def test_posts_issue_comment(self, mock_request, client):
         mock_resp = MagicMock()
         mock_resp.json.return_value = {"html_url": "https://github.com/owner/repo/issues/1#comment"}
         mock_resp.raise_for_status = MagicMock()
-        mock_post.return_value = mock_resp
+        mock_request.return_value = mock_resp
 
         result = client.post_comment("owner", "repo", 1, "Nice PR!")
         assert "html_url" in result

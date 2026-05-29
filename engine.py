@@ -3,7 +3,10 @@
 import os
 import re
 import threading
+import logging
 from dataclasses import dataclass, field
+
+logger = logging.getLogger("pr-review-bot.engine")
 
 
 def parse_verdict(review_text: str) -> str:
@@ -71,6 +74,49 @@ def _run_with_timeout(crew, timeout_seconds: int):
     if exc:
         raise exc
     return result
+
+
+def sanitize_review_output(text: str) -> str:
+    """Post-process LLM review output for clean GitHub markdown rendering.
+
+    - Strips wrapping code fences (``` markers at start/end)
+    - Ensures code fences are properly closed
+    - Normalizes verdict line format
+    """
+    text = text.strip()
+
+    # Strip wrapping code fences if the entire output is inside one
+    if text.startswith("```markdown") or text.startswith("```md"):
+        end_fence = text.rfind("```")
+        if end_fence > 0:
+            text = text[text.index("\n") + 1:end_fence].strip()
+    elif text.startswith("```") and text.count("```") >= 2:
+        # Generic code fence wrapping
+        first_newline = text.index("\n") if "\n" in text else len(text)
+        end_fence = text.rfind("```")
+        if end_fence > first_newline:
+            text = text[first_newline + 1:end_fence].strip()
+
+    # Ensure all code fences are properly paired
+    fence_count = text.count("```")
+    if fence_count % 2 != 0:
+        text += "\n```"
+
+    # Normalize verdict line — ensure it's on its own line at the end
+    verdict_match = re.search(
+        r"VERDICT:\s*(APPROVE|REQUEST[_ ]CHANGES)", text, re.IGNORECASE
+    )
+    if verdict_match:
+        verdict_value = verdict_match.group(1).upper().replace(" ", "_")
+        if verdict_value == "REQUEST_CHANGES":
+            normalized = "VERDICT: REQUEST CHANGES"
+        else:
+            normalized = f"VERDICT: {verdict_value}"
+        # Remove the old verdict
+        text = text[:verdict_match.start()] + text[verdict_match.end():]
+        text = text.rstrip() + f"\n\n{normalized}"
+
+    return text
 
 
 def run_review(
@@ -178,6 +224,7 @@ def run_review(
     result = _run_with_timeout(pr_review_crew, total_timeout)
 
     result_str = str(result)
+    result_str = sanitize_review_output(result_str)
     verdict = parse_verdict(result_str)
 
     if verdict == "APPROVE":
@@ -193,6 +240,19 @@ def run_review(
     from review_parser import parse_inline_comments
     pr_files = gh.fetch_pr_files(owner, repo, pr_number)
     inline_comments = parse_inline_comments(result_str, pr_files)
+
+    # Filter: only keep comments for files that exist in the PR
+    if inline_comments:
+        pr_filenames = {f.get("filename") for f in pr_files}
+        before_count = len(inline_comments)
+        inline_comments = [
+            c for c in inline_comments if c.get("path") in pr_filenames
+        ]
+        dropped = before_count - len(inline_comments)
+        if dropped:
+            logger.warning(
+                f"Dropped {dropped} inline comment(s) referencing files not in the PR"
+            )
 
     if inline_comments:
         review_body += "\n\n> _Details are commented directly on the code._"

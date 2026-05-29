@@ -1,7 +1,10 @@
 """Parse Tech Lead review output into inline comment dicts for GitHub API."""
 
+import logging
 import re
 from typing import Optional
+
+logger = logging.getLogger("pr-review-bot.review_parser")
 
 
 def parse_inline_comments(review_text: str, pr_files: list[dict]) -> list[dict]:
@@ -35,6 +38,9 @@ def parse_inline_comments(review_text: str, pr_files: list[dict]) -> list[dict]:
 
         position = _resolve_position(file_ref, line_num, file_maps)
         if position is None:
+            logger.debug(
+                f"Could not resolve position for {file_ref}:{line_num}, skipping"
+            )
             continue
 
         comments.append({
@@ -140,13 +146,29 @@ def _resolve_position(
     file_path: str,
     line_num: int,
     file_maps: dict[str, dict[int, int]],
-    nearby_range: int = 3,
+    nearby_range: int = 5,
 ) -> Optional[int]:
     """Resolve a file:line reference to a diff position.
 
     Tries exact match first, then nearby lines (+/- nearby_range).
+    Falls back to fuzzy file path matching (case-insensitive, basename match).
     """
     line_map = file_maps.get(file_path)
+
+    # Fuzzy fallback: try case-insensitive match, then basename match
+    if not line_map:
+        lower_path = file_path.lower()
+        for mapped_path in file_maps:
+            if mapped_path.lower() == lower_path:
+                line_map = file_maps[mapped_path]
+                break
+        if not line_map:
+            basename = file_path.rsplit("/", 1)[-1].lower()
+            for mapped_path in file_maps:
+                if mapped_path.rsplit("/", 1)[-1].lower() == basename:
+                    line_map = file_maps[mapped_path]
+                    break
+
     if not line_map:
         return None
 
