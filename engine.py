@@ -106,21 +106,24 @@ def sanitize_review_output(text: str) -> str:
     """
     text = text.strip()
 
-    # Strip wrapping code fences if the entire output is inside one
+    # Strip wrapping code fences ONLY if the entire output is wrapped:
+    # must start with ``` AND end with ``` (possibly with trailing whitespace)
     if text.startswith("```markdown") or text.startswith("```md"):
         end_fence = text.rfind("```")
         if end_fence > 0:
             text = text[text.index("\n") + 1:end_fence].strip()
-    elif text.startswith("```") and text.count("```") >= 2:
-        # Generic code fence wrapping
-        first_newline = text.index("\n") if "\n" in text else len(text)
-        end_fence = text.rfind("```")
-        if end_fence > first_newline:
-            text = text[first_newline + 1:end_fence].strip()
+    elif text.startswith("```") and text.rstrip().endswith("```"):
+        inner = text[3:text.rstrip().rfind("```")].strip()
+        # Only strip if inner content has no ``` (i.e., it's a single wrapper)
+        if "```" not in inner:
+            text = inner
 
-    # Ensure markdown headers (## ### ####) are on their own lines
-    text = re.sub(r"([^\n])\n(#{1,4}\s)", r"\1\n\n\2", text)
-    text = re.sub(r"([^\n])(#{1,4}\s)", r"\1\n\n\2", text)
+    # Ensure markdown headers (## ### ####) are on their own lines.
+    # Use #{2,4} to avoid matching single # or breaking ## into #\n#.
+    # Inline: text ### Header -> text\n\n### Header
+    text = re.sub(r"([^\n#])\s+(#{2,4}\s)", r"\1\n\n\2", text)
+    # After newline without blank line: text\n### Header -> text\n\n### Header
+    text = re.sub(r"([^\n])\n(#{2,4}\s)", r"\1\n\n\2", text)
 
     # Split inline code fences: ``` after text on same line -> newline before
     text = re.sub(r"([^\n`])```", r"\1\n\n```", text)
@@ -133,7 +136,6 @@ def sanitize_review_output(text: str) -> str:
     text = re.sub(r"```\n([^\n#])", r"```\n\n\1", text)
 
     # Split consecutive list items on same line: "- text - text" -> "- text\n- text"
-    # Only split on " - " or " - **" that looks like a new list item
     text = re.sub(r"([^\n])\s(- \*\*)", r"\1\n\2", text)
     text = re.sub(r"([^\n])\s(- \w)", r"\1\n\2", text)
 
