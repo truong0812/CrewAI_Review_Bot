@@ -47,33 +47,44 @@ class ReviewResult:
     inline_comments: list = field(default_factory=list)
 
 
-def _run_with_timeout(crew, timeout_seconds: int):
-    """Run crew.kickoff() with a total timeout across all agents."""
-    result = None
-    exc = None
-    timed_out = threading.Event()
+def _run_with_timeout(crew, timeout_seconds: int, retries: int = 1):
+    """Run crew.kickoff() with a total timeout across all agents.
 
-    def _worker():
-        nonlocal result, exc
-        try:
-            result = crew.kickoff()
-        except Exception as e:
-            if not timed_out.is_set():
-                exc = e
+    On timeout, retries once with 1.5x the timeout before giving up.
+    """
+    for attempt in range(retries + 1):
+        result = None
+        exc = None
+        timed_out = threading.Event()
 
-    thread = threading.Thread(target=_worker, daemon=True)
-    thread.start()
-    thread.join(timeout=timeout_seconds)
+        def _worker():
+            nonlocal result, exc
+            try:
+                result = crew.kickoff()
+            except Exception as e:
+                if not timed_out.is_set():
+                    exc = e
 
-    if thread.is_alive():
-        timed_out.set()
-        raise TimeoutError(
-            f"Review timed out after {timeout_seconds}s. "
-            "Consider reducing PR size or increasing AGENT_TIMEOUT_SECONDS."
-        )
-    if exc:
-        raise exc
-    return result
+        thread = threading.Thread(target=_worker, daemon=True)
+        thread.start()
+        thread.join(timeout=timeout_seconds)
+
+        if thread.is_alive():
+            timed_out.set()
+            if attempt < retries:
+                timeout_seconds = int(timeout_seconds * 1.5)
+                logger.warning(
+                    f"Review timed out after {timeout_seconds}s, "
+                    f"retrying with {timeout_seconds}s..."
+                )
+                continue
+            raise TimeoutError(
+                f"Review timed out after {timeout_seconds}s (with retry). "
+                "Consider reducing PR size or increasing AGENT_TIMEOUT_SECONDS."
+            )
+        if exc:
+            raise exc
+        return result
 
 
 def sanitize_review_output(text: str) -> str:
@@ -221,7 +232,28 @@ def run_review(
     )
 
     total_timeout = throttle_config["timeout"]
-    result = _run_with_timeout(pr_review_crew, total_timeout)
+
+    try:
+        result = _run_with_timeout(pr_review_crew, total_timeout, retries=1)
+    except TimeoutError:
+        # Graceful fallback: post a timeout notification on the PR
+        logger.warning(f"Review timed out for {owner}/{repo}#{pr_number}, posting notification")
+        commit_sha = gh.get_pr_head_commit(owner, repo, pr_number)
+        fallback_body = (
+            f"Review timed out after {total_timeout}s (with retry). "
+            f"The PR may be too large for the current timeout setting.\n\n"
+            f"**Suggestions:**\n"
+            f"- Increase `AGENT_TIMEOUT_SECONDS` (current: {total_timeout}s)\n"
+            f"- Reduce PR size\n"
+            f"- Try running the review again\n\n"
+            f"_This is an automated message from PR Review Bot._"
+        )
+        if not dry_run:
+            try:
+                gh.post_comment(owner, repo, pr_number, fallback_body)
+            except Exception:
+                pass
+        raise
 
     result_str = str(result)
     result_str = sanitize_review_output(result_str)

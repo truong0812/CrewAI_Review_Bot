@@ -47,7 +47,7 @@ class _Config:
 
         # Performance Throttling
         self.MAX_CONCURRENT_AGENTS = _env_int("MAX_CONCURRENT_AGENTS", 4)
-        self.AGENT_TIMEOUT_SECONDS = _env_int("AGENT_TIMEOUT_SECONDS", 180)
+        self.AGENT_TIMEOUT_SECONDS = _env_int("AGENT_TIMEOUT_SECONDS", 240)
 
         # Retry Configuration
         self.MAX_RETRY_ATTEMPTS = _env_int("MAX_RETRY_ATTEMPTS", 3)
@@ -110,7 +110,7 @@ class _Config:
             )
         if self.AGENT_TIMEOUT_SECONDS < 10 or self.AGENT_TIMEOUT_SECONDS > 600:
             raise ValueError(
-                f"AGENT_TIMEOUT_SECONDS must be between 10 and 120, got {self.AGENT_TIMEOUT_SECONDS}"
+                f"AGENT_TIMEOUT_SECONDS must be between 10 and 600, got {self.AGENT_TIMEOUT_SECONDS}"
             )
         if self.MAX_RETRY_ATTEMPTS < 1 or self.MAX_RETRY_ATTEMPTS > 10:
             raise ValueError(
