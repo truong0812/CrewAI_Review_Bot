@@ -155,7 +155,9 @@ def _resolve_position(
     """
     line_map = file_maps.get(file_path)
 
-    # Fuzzy fallback: try case-insensitive match, then basename match
+    # Fuzzy fallback: try case-insensitive match, then basename match.
+    # Basename match is skipped when multiple files share the same name
+    # to avoid mapping to the wrong file (e.g., src/utils.py vs test/utils.py).
     if not line_map:
         lower_path = file_path.lower()
         for mapped_path in file_maps:
@@ -164,10 +166,12 @@ def _resolve_position(
                 break
         if not line_map:
             basename = file_path.rsplit("/", 1)[-1].lower()
-            for mapped_path in file_maps:
-                if mapped_path.rsplit("/", 1)[-1].lower() == basename:
-                    line_map = file_maps[mapped_path]
-                    break
+            matches = [
+                file_maps[p] for p in file_maps
+                if p.rsplit("/", 1)[-1].lower() == basename
+            ]
+            if len(matches) == 1:
+                line_map = matches[0]
 
     if not line_map:
         return None

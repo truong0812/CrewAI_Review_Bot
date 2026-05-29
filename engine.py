@@ -51,10 +51,17 @@ def _run_with_timeout(crew, timeout_seconds: int, retries: int = 1):
     """Run crew.kickoff() with a total timeout across all agents.
 
     On timeout, retries once with 1.5x the timeout before giving up.
+    This gives slow LLM providers a second chance with more time.
+
+    Args:
+        crew: The CrewAI crew to execute.
+        timeout_seconds: Base timeout per attempt (increases by 1.5x on retry).
+        retries: Number of retries after the first attempt (default 1).
     """
     for attempt in range(retries + 1):
         result = None
         exc = None
+        # Signal flag so the worker knows not to store exceptions after timeout
         timed_out = threading.Event()
 
         def _worker():
@@ -62,6 +69,7 @@ def _run_with_timeout(crew, timeout_seconds: int, retries: int = 1):
             try:
                 result = crew.kickoff()
             except Exception as e:
+                # Only store exception if we haven't already timed out
                 if not timed_out.is_set():
                     exc = e
 
@@ -72,10 +80,10 @@ def _run_with_timeout(crew, timeout_seconds: int, retries: int = 1):
         if thread.is_alive():
             timed_out.set()
             if attempt < retries:
+                # Increase timeout by 50% for the retry attempt
                 timeout_seconds = int(timeout_seconds * 1.5)
                 logger.warning(
-                    f"Review timed out after {timeout_seconds}s, "
-                    f"retrying with {timeout_seconds}s..."
+                    f"Review timed out, retrying with {timeout_seconds}s..."
                 )
                 continue
             raise TimeoutError(

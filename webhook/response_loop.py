@@ -1,5 +1,6 @@
 """Classify developer comment intent and respond accordingly."""
 
+import logging
 import re
 import threading
 
@@ -9,11 +10,18 @@ from webhook.state import state_store
 
 import config.settings as cfg
 
+logger = logging.getLogger("pr-review-bot.response_loop")
+
 LLM_TIMEOUT_SECONDS = 60
 
 
 def _call_llm_with_timeout(llm, prompt: str, timeout: int = LLM_TIMEOUT_SECONDS) -> str:
-    """Call LLM with a timeout to avoid blocking the thread."""
+    """Call LLM with a timeout to avoid blocking the thread.
+
+    Note: On timeout, the daemon thread continues running in the background
+    until the LLM request completes. This is acceptable for low-traffic usage.
+    For high-traffic scenarios, consider switching to async with cancellable requests.
+    """
     result = [None]
     exc = [None]
 
@@ -28,6 +36,7 @@ def _call_llm_with_timeout(llm, prompt: str, timeout: int = LLM_TIMEOUT_SECONDS)
     thread.join(timeout=timeout)
 
     if thread.is_alive():
+        logger.warning(f"LLM call timed out after {timeout}s, daemon thread still running in background")
         raise TimeoutError(f"LLM call timed out after {timeout}s")
     if exc[0]:
         raise exc[0]
