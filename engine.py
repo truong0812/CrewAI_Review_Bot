@@ -100,6 +100,8 @@ def sanitize_review_output(text: str) -> str:
 
     - Strips wrapping code fences (``` markers at start/end)
     - Ensures code fences are properly closed
+    - Normalizes markdown headers to be on their own lines
+    - Ensures proper line breaks before list items and code blocks
     - Normalizes verdict line format
     """
     text = text.strip()
@@ -115,6 +117,28 @@ def sanitize_review_output(text: str) -> str:
         end_fence = text.rfind("```")
         if end_fence > first_newline:
             text = text[first_newline + 1:end_fence].strip()
+
+    # Ensure markdown headers (## ### ####) are on their own lines
+    text = re.sub(r"([^\n])\n(#{1,4}\s)", r"\1\n\n\2", text)
+    text = re.sub(r"([^\n])(#{1,4}\s)", r"\1\n\n\2", text)
+
+    # Split inline code fences: ``` after text on same line -> newline before
+    text = re.sub(r"([^\n`])```", r"\1\n\n```", text)
+    # Split closing code fence followed by text on same line
+    text = re.sub(r"```([^\n`])", r"```\n\n\1", text)
+
+    # Ensure blank line before code fences when preceded by text on prev line
+    text = re.sub(r"([^\n])\n```", r"\1\n\n```", text)
+    # Ensure blank line after closing code fences when followed by text
+    text = re.sub(r"```\n([^\n#])", r"```\n\n\1", text)
+
+    # Split consecutive list items on same line: "- text - text" -> "- text\n- text"
+    # Only split on " - " or " - **" that looks like a new list item
+    text = re.sub(r"([^\n])\s(- \*\*)", r"\1\n\2", text)
+    text = re.sub(r"([^\n])\s(- \w)", r"\1\n\2", text)
+
+    # Ensure blank line before list items after a non-list line
+    text = re.sub(r"([^\n*-])\n(-\s+)", r"\1\n\n\2", text)
 
     # Ensure all code fences are properly paired
     fence_count = text.count("```")
