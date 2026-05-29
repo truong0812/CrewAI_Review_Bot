@@ -1,12 +1,46 @@
 """Classify developer comment intent and respond accordingly."""
 
+import logging
 import re
+import threading
 
 from github_utils.client import GitHubClient
 from webhook.conversation import ResponseResult
 from webhook.state import state_store
 
 import config.settings as cfg
+
+logger = logging.getLogger("pr-review-bot.response_loop")
+
+LLM_TIMEOUT_SECONDS = 60
+
+
+def _call_llm_with_timeout(llm, prompt: str, timeout: int = LLM_TIMEOUT_SECONDS) -> str:
+    """Call LLM with a timeout to avoid blocking the thread.
+
+    Note: On timeout, the daemon thread continues running in the background
+    until the LLM request completes. This is acceptable for low-traffic usage.
+    For high-traffic scenarios, consider switching to async with cancellable requests.
+    """
+    result = [None]
+    exc = [None]
+
+    def _worker():
+        try:
+            result[0] = llm.call(prompt)
+        except Exception as e:
+            exc[0] = e
+
+    thread = threading.Thread(target=_worker, daemon=True)
+    thread.start()
+    thread.join(timeout=timeout)
+
+    if thread.is_alive():
+        logger.warning(f"LLM call timed out after {timeout}s, daemon thread still running in background")
+        raise TimeoutError(f"LLM call timed out after {timeout}s")
+    if exc[0]:
+        raise exc[0]
+    return result[0]
 
 
 def classify_intent(comment_body: str) -> str:
@@ -105,7 +139,7 @@ def _answer_question(
     )
 
     try:
-        answer = llm.call(prompt)
+        answer = _call_llm_with_timeout(llm, prompt)
         reply = f"**@{author}** — {answer}"
         gh.post_comment(owner, repo, pr_number, reply)
         return ResponseResult(action="answered", intent=intent, reply_text=reply)
@@ -158,7 +192,7 @@ def _evaluate_pushback(
     )
 
     try:
-        response = llm.call(prompt)
+        response = _call_llm_with_timeout(llm, prompt)
         accepted = response.strip().lower().startswith("accepted")
         # Strip the verdict line for the reply
         reply_body = re.sub(r"^(?:accepted|rejected)\s*\n", "", response.strip(), flags=re.IGNORECASE)

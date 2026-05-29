@@ -24,18 +24,21 @@ class GitHubClient:
             "X-GitHub-Api-Version": "2022-11-28",
         }
 
-    def _get_with_retry(self, url: str, **kwargs) -> httpx.Response:
-        """GET request with exponential backoff retry.
+    def _request_with_retry(self, method: str, url: str, **kwargs) -> httpx.Response:
+        """HTTP request with exponential backoff retry.
 
         Retries on transient failures: HTTP 429, 500, 502, 503, 504 and timeouts.
         Does NOT retry on 4xx client errors (except 429).
         """
         last_exc = None
         retryable_statuses = {429, 500, 502, 503, 504}
+        merged_headers = {**self.headers, **kwargs.pop("headers", {})}
 
         for attempt in range(cfg.MAX_RETRY_ATTEMPTS):
             try:
-                resp = httpx.get(url, headers=self.headers, timeout=self.timeout, **kwargs)
+                resp = httpx.request(
+                    method, url, headers=merged_headers, timeout=self.timeout, **kwargs
+                )
                 resp.raise_for_status()
                 return resp
             except httpx.HTTPStatusError as e:
@@ -57,6 +60,12 @@ class GitHubClient:
                     time.sleep(delay)
 
         raise last_exc
+
+    def _get_with_retry(self, url: str, **kwargs) -> httpx.Response:
+        return self._request_with_retry("GET", url, **kwargs)
+
+    def _post_with_retry(self, url: str, **kwargs) -> httpx.Response:
+        return self._request_with_retry("POST", url, **kwargs)
 
     def get_pr_metadata(self, owner: str, repo: str, pr_number: int) -> dict:
         """Fetch PR metadata for context-aware review sizing.
@@ -138,13 +147,7 @@ class GitHubClient:
         page = 1
 
         while True:
-            resp = httpx.get(
-                url,
-                headers=self.headers,
-                params={"per_page": 100, "page": page},
-                timeout=self.timeout,
-            )
-            resp.raise_for_status()
+            resp = self._get_with_retry(url, params={"per_page": 100, "page": page})
             data = resp.json()
             if not data:
                 break
@@ -159,23 +162,20 @@ class GitHubClient:
         """Fetch the full diff/patch of a PR."""
         url = f"{self.BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
         headers = {**self.headers, "Accept": "application/vnd.github.v3.diff"}
-        resp = httpx.get(url, headers=headers, timeout=self.timeout)
-        resp.raise_for_status()
+        resp = self._get_with_retry(url, headers=headers)
         return resp.text
 
     def fetch_pr_title_and_body(self, owner: str, repo: str, pr_number: int) -> dict:
         """Fetch PR title and description."""
         url = f"{self.BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
-        resp = httpx.get(url, headers=self.headers, timeout=self.timeout)
-        resp.raise_for_status()
+        resp = self._get_with_retry(url)
         data = resp.json()
         return {"title": data.get("title", ""), "body": data.get("body", "")}
 
     def fetch_pr_author(self, owner: str, repo: str, pr_number: int) -> str:
         """Fetch the PR author's GitHub username."""
         url = f"{self.BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
-        resp = httpx.get(url, headers=self.headers, timeout=self.timeout)
-        resp.raise_for_status()
+        resp = self._get_with_retry(url)
         data = resp.json()
         return data.get("user", {}).get("login", "")
 
@@ -216,8 +216,7 @@ class GitHubClient:
     def post_comment(self, owner: str, repo: str, pr_number: int, body: str) -> dict:
         """Post a comment on a PR (issue comment)."""
         url = f"{self.BASE_URL}/repos/{owner}/{repo}/issues/{pr_number}/comments"
-        resp = httpx.post(url, headers=self.headers, json={"body": body}, timeout=self.timeout)
-        resp.raise_for_status()
+        resp = self._post_with_retry(url, json={"body": body})
         return resp.json()
 
     def get_pr_head_commit(self, owner: str, repo: str, pr_number: int) -> str:
@@ -232,8 +231,7 @@ class GitHubClient:
             The SHA string of the PR's head commit.
         """
         url = f"{self.BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
-        resp = httpx.get(url, headers=self.headers, timeout=self.timeout)
-        resp.raise_for_status()
+        resp = self._get_with_retry(url)
         data = resp.json()
         if "head" not in data or "sha" not in data.get("head", {}):
             raise ValueError(
@@ -275,10 +273,7 @@ class GitHubClient:
         if comments:
             payload["comments"] = comments
         try:
-            resp = httpx.post(
-                url, headers=self.headers, json=payload, timeout=self.timeout
-            )
-            resp.raise_for_status()
+            resp = self._post_with_retry(url, json=payload)
         except httpx.TimeoutException:
             raise TimeoutError(
                 f"GitHub API request timed out after {self.timeout}s "

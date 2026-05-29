@@ -3,7 +3,10 @@
 import os
 import re
 import threading
+import logging
 from dataclasses import dataclass, field
+
+logger = logging.getLogger("pr-review-bot.engine")
 
 
 def parse_verdict(review_text: str) -> str:
@@ -44,33 +47,121 @@ class ReviewResult:
     inline_comments: list = field(default_factory=list)
 
 
-def _run_with_timeout(crew, timeout_seconds: int):
-    """Run crew.kickoff() with a total timeout across all agents."""
-    result = None
-    exc = None
-    timed_out = threading.Event()
+def _run_with_timeout(crew, timeout_seconds: int, retries: int = 1):
+    """Run crew.kickoff() with a total timeout across all agents.
 
-    def _worker():
-        nonlocal result, exc
-        try:
-            result = crew.kickoff()
-        except Exception as e:
-            if not timed_out.is_set():
-                exc = e
+    On timeout, retries once with 1.5x the timeout before giving up.
+    This gives slow LLM providers a second chance with more time.
 
-    thread = threading.Thread(target=_worker, daemon=True)
-    thread.start()
-    thread.join(timeout=timeout_seconds)
+    Args:
+        crew: The CrewAI crew to execute.
+        timeout_seconds: Base timeout per attempt (increases by 1.5x on retry).
+        retries: Number of retries after the first attempt (default 1).
+    """
+    for attempt in range(retries + 1):
+        result = None
+        exc = None
+        # Signal flag so the worker knows not to store exceptions after timeout
+        timed_out = threading.Event()
 
-    if thread.is_alive():
-        timed_out.set()
-        raise TimeoutError(
-            f"Review timed out after {timeout_seconds}s. "
-            "Consider reducing PR size or increasing AGENT_TIMEOUT_SECONDS."
-        )
-    if exc:
-        raise exc
-    return result
+        def _worker():
+            nonlocal result, exc
+            try:
+                result = crew.kickoff()
+            except Exception as e:
+                # Only store exception if we haven't already timed out
+                if not timed_out.is_set():
+                    exc = e
+
+        thread = threading.Thread(target=_worker, daemon=True)
+        thread.start()
+        thread.join(timeout=timeout_seconds)
+
+        if thread.is_alive():
+            timed_out.set()
+            if attempt < retries:
+                # Increase timeout by 50% for the retry attempt
+                timeout_seconds = int(timeout_seconds * 1.5)
+                logger.warning(
+                    f"Review timed out, retrying with {timeout_seconds}s..."
+                )
+                continue
+            raise TimeoutError(
+                f"Review timed out after {timeout_seconds}s (with retry). "
+                "Consider reducing PR size or increasing AGENT_TIMEOUT_SECONDS."
+            )
+        if exc:
+            raise exc
+        return result
+
+
+def sanitize_review_output(text: str) -> str:
+    """Post-process LLM review output for clean GitHub markdown rendering.
+
+    - Strips wrapping code fences (``` markers at start/end)
+    - Ensures code fences are properly closed
+    - Normalizes markdown headers to be on their own lines
+    - Ensures proper line breaks before list items and code blocks
+    - Normalizes verdict line format
+    """
+    text = text.strip()
+
+    # Strip wrapping code fences ONLY if the entire output is wrapped:
+    # must start with ``` AND end with ``` (possibly with trailing whitespace)
+    if text.startswith("```markdown") or text.startswith("```md"):
+        end_fence = text.rfind("```")
+        if end_fence > 0:
+            text = text[text.index("\n") + 1:end_fence].strip()
+    elif text.startswith("```") and text.rstrip().endswith("```"):
+        inner = text[3:text.rstrip().rfind("```")].strip()
+        # Only strip if inner content has no ``` (i.e., it's a single wrapper)
+        if "```" not in inner:
+            text = inner
+
+    # Ensure markdown headers (## ### ####) are on their own lines.
+    # Use #{2,4} to avoid matching single # or breaking ## into #\n#.
+    # Inline: text ### Header -> text\n\n### Header
+    text = re.sub(r"([^\n#])\s+(#{2,4}\s)", r"\1\n\n\2", text)
+    # After newline without blank line: text\n### Header -> text\n\n### Header
+    text = re.sub(r"([^\n])\n(#{2,4}\s)", r"\1\n\n\2", text)
+
+    # Split inline code fences: ``` after text on same line -> newline before
+    text = re.sub(r"([^\n`])```", r"\1\n\n```", text)
+    # Split closing code fence followed by text on same line
+    text = re.sub(r"```([^\n`])", r"```\n\n\1", text)
+
+    # Ensure blank line before code fences when preceded by text on prev line
+    text = re.sub(r"([^\n])\n```", r"\1\n\n```", text)
+    # Ensure blank line after closing code fences when followed by text
+    text = re.sub(r"```\n([^\n#])", r"```\n\n\1", text)
+
+    # Split consecutive list items on same line: "- text - text" -> "- text\n- text"
+    text = re.sub(r"([^\n])\s(- \*\*)", r"\1\n\2", text)
+    text = re.sub(r"([^\n])\s(- \w)", r"\1\n\2", text)
+
+    # Ensure blank line before list items after a non-list line
+    text = re.sub(r"([^\n*-])\n(-\s+)", r"\1\n\n\2", text)
+
+    # Ensure all code fences are properly paired
+    fence_count = text.count("```")
+    if fence_count % 2 != 0:
+        text += "\n```"
+
+    # Normalize verdict line — ensure it's on its own line at the end
+    verdict_match = re.search(
+        r"VERDICT:\s*(APPROVE|REQUEST[_ ]CHANGES)", text, re.IGNORECASE
+    )
+    if verdict_match:
+        verdict_value = verdict_match.group(1).upper().replace(" ", "_")
+        if verdict_value == "REQUEST_CHANGES":
+            normalized = "VERDICT: REQUEST CHANGES"
+        else:
+            normalized = f"VERDICT: {verdict_value}"
+        # Remove the old verdict
+        text = text[:verdict_match.start()] + text[verdict_match.end():]
+        text = text.rstrip() + f"\n\n{normalized}"
+
+    return text
 
 
 def run_review(
@@ -175,9 +266,31 @@ def run_review(
     )
 
     total_timeout = throttle_config["timeout"]
-    result = _run_with_timeout(pr_review_crew, total_timeout)
+
+    try:
+        result = _run_with_timeout(pr_review_crew, total_timeout, retries=1)
+    except TimeoutError:
+        # Graceful fallback: post a timeout notification on the PR
+        logger.warning(f"Review timed out for {owner}/{repo}#{pr_number}, posting notification")
+        commit_sha = gh.get_pr_head_commit(owner, repo, pr_number)
+        fallback_body = (
+            f"Review timed out after {total_timeout}s (with retry). "
+            f"The PR may be too large for the current timeout setting.\n\n"
+            f"**Suggestions:**\n"
+            f"- Increase `AGENT_TIMEOUT_SECONDS` (current: {total_timeout}s)\n"
+            f"- Reduce PR size\n"
+            f"- Try running the review again\n\n"
+            f"_This is an automated message from PR Review Bot._"
+        )
+        if not dry_run:
+            try:
+                gh.post_comment(owner, repo, pr_number, fallback_body)
+            except Exception:
+                pass
+        raise
 
     result_str = str(result)
+    result_str = sanitize_review_output(result_str)
     verdict = parse_verdict(result_str)
 
     if verdict == "APPROVE":
@@ -193,6 +306,19 @@ def run_review(
     from review_parser import parse_inline_comments
     pr_files = gh.fetch_pr_files(owner, repo, pr_number)
     inline_comments = parse_inline_comments(result_str, pr_files)
+
+    # Filter: only keep comments for files that exist in the PR
+    if inline_comments:
+        pr_filenames = {f.get("filename") for f in pr_files}
+        before_count = len(inline_comments)
+        inline_comments = [
+            c for c in inline_comments if c.get("path") in pr_filenames
+        ]
+        dropped = before_count - len(inline_comments)
+        if dropped:
+            logger.warning(
+                f"Dropped {dropped} inline comment(s) referencing files not in the PR"
+            )
 
     if inline_comments:
         review_body += "\n\n> _Details are commented directly on the code._"

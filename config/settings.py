@@ -31,7 +31,7 @@ class _Config:
 
         # GitHub Configuration
         self.GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
-        self.API_TIMEOUT = _env_int("API_TIMEOUT", 30)
+        self.API_TIMEOUT = _env_int("API_TIMEOUT", 45)
         self.REVIEW_OUTPUT_PATH = os.getenv("REVIEW_OUTPUT_PATH", "")
 
         # Review Configuration
@@ -47,7 +47,7 @@ class _Config:
 
         # Performance Throttling
         self.MAX_CONCURRENT_AGENTS = _env_int("MAX_CONCURRENT_AGENTS", 4)
-        self.AGENT_TIMEOUT_SECONDS = _env_int("AGENT_TIMEOUT_SECONDS", 180)
+        self.AGENT_TIMEOUT_SECONDS = _env_int("AGENT_TIMEOUT_SECONDS", 240)
 
         # Retry Configuration
         self.MAX_RETRY_ATTEMPTS = _env_int("MAX_RETRY_ATTEMPTS", 3)
@@ -61,6 +61,7 @@ class _Config:
         self.WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "")
         self.WEBHOOK_PORT = _env_int("WEBHOOK_PORT", 8000)
         self.WEBHOOK_HOST = os.getenv("WEBHOOK_HOST", "0.0.0.0")
+        self.WEBHOOK_MAX_WORKERS = _env_int("WEBHOOK_MAX_WORKERS", 4)
         self.WEBHOOK_DEV_MODE = os.getenv("WEBHOOK_DEV_MODE", "false").lower() in ("true", "1", "yes")
         self.RESPONSE_LOOP_ENABLED = os.getenv("RESPONSE_LOOP_ENABLED", "true").lower() in ("true", "1", "yes")
         self.AUTO_REVIEW_ON_PUSH = os.getenv("AUTO_REVIEW_ON_PUSH", "true").lower() in ("true", "1", "yes")
@@ -109,7 +110,7 @@ class _Config:
             )
         if self.AGENT_TIMEOUT_SECONDS < 10 or self.AGENT_TIMEOUT_SECONDS > 600:
             raise ValueError(
-                f"AGENT_TIMEOUT_SECONDS must be between 10 and 120, got {self.AGENT_TIMEOUT_SECONDS}"
+                f"AGENT_TIMEOUT_SECONDS must be between 10 and 600, got {self.AGENT_TIMEOUT_SECONDS}"
             )
         if self.MAX_RETRY_ATTEMPTS < 1 or self.MAX_RETRY_ATTEMPTS > 10:
             raise ValueError(
@@ -142,6 +143,7 @@ class _Config:
             "WEBHOOK_SECRET": self.WEBHOOK_SECRET,
             "WEBHOOK_PORT": self.WEBHOOK_PORT,
             "WEBHOOK_HOST": self.WEBHOOK_HOST,
+            "WEBHOOK_MAX_WORKERS": self.WEBHOOK_MAX_WORKERS,
             "WEBHOOK_DEV_MODE": self.WEBHOOK_DEV_MODE,
             "RESPONSE_LOOP_ENABLED": self.RESPONSE_LOOP_ENABLED,
             "AUTO_REVIEW_ON_PUSH": self.AUTO_REVIEW_ON_PUSH,
